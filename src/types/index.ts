@@ -79,7 +79,6 @@ export interface RetrievedChunk {
   chunk_id: string;
   document_name: string;
   content: string;
-  chunk_index: number;
   similarity: number;
 }
 
