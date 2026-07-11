@@ -9,8 +9,15 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { name, phone, serviceInterest, preferredDate, conversationId, source } =
-    body;
+  const {
+    name,
+    phone,
+    serviceInterest,
+    preferredDate,
+    conversationId,
+    source,
+    message,
+  } = body;
 
   if (!name || !phone) {
     return Response.json(
@@ -29,6 +36,7 @@ export async function POST(request: Request) {
       preferred_date: preferredDate ?? null,
       conversation_id: conversationId ?? null,
       source: source ?? "chat",
+      notes: message ?? null,
     })
     .select("id")
     .single();

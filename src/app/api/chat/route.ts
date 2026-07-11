@@ -1,4 +1,4 @@
-import { retrieveContext } from "@/lib/ai/retrieval";
+import { retrieveContext, detectLanguage } from "@/lib/ai/retrieval";
 import { buildSystemPrompt } from "@/lib/ai/prompts";
 import { streamChat } from "@/lib/ai/chat";
 import type { ChatRequestBody } from "@/types";
@@ -35,7 +35,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const systemPrompt = buildSystemPrompt(chunks);
+  const language = detectLanguage(message);
+  const systemPrompt = buildSystemPrompt(chunks, language);
 
   let stream: ReadableStream<Uint8Array>;
   try {

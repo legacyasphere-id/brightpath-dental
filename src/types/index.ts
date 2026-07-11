@@ -99,6 +99,7 @@ export interface LeadRequestBody {
   preferredDate?: string;
   conversationId?: string;
   source?: LeadSource;
+  message?: string;
 }
 
 export interface KnowledgeUploadResponse {

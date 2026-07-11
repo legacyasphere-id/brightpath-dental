@@ -47,6 +47,7 @@ export function LeadForm() {
           phone: form.phone,
           serviceInterest: form.service || undefined,
           source: "form",
+          message: form.message || undefined,
         }),
       });
       setStatus(res.ok ? "success" : "error");
