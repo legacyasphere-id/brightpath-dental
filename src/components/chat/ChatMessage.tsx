@@ -1,6 +1,12 @@
-import type { Message } from "@/types";
+import type { MessageRole } from "@/types";
 
-export function ChatMessage({ message }: { message: Message }) {
+export interface ChatMessageData {
+  id: string;
+  role: MessageRole;
+  content: string;
+}
+
+export function ChatMessage({ message }: { message: ChatMessageData }) {
   const isUser = message.role === "user";
 
   return (
