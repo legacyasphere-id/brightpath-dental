@@ -1,6 +1,13 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: "https://openrouter.ai/api/v1",
+  defaultHeaders: {
+    "HTTP-Referer": "https://brightpath-dental.vercel.app",
+    "X-Title": "BrightPath Dental",
+  },
+});
 
 const LEAD_KEYWORDS = [
   "book",
@@ -36,7 +43,7 @@ export async function streamChat(
   let completion;
   try {
     completion = await openai.chat.completions.create({
-      model: process.env.OPENAI_CHAT_MODEL ?? "gpt-4o-mini",
+      model: process.env.OPENAI_CHAT_MODEL ?? "openai/gpt-4o-mini",
       stream: true,
       messages: [
         { role: "system", content: systemPrompt },
