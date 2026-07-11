@@ -1,12 +1,42 @@
-import { NextResponse } from "next/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { LeadRequestBody } from "@/types";
 
-// Phase 4: validate and insert into the leads table.
 export async function POST(request: Request) {
-  const body: LeadRequestBody = await request.json();
-  void body;
-  return NextResponse.json(
-    { error: "Not implemented — see Phase 4" },
-    { status: 501 },
-  );
+  let body: LeadRequestBody;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { name, phone, serviceInterest, preferredDate, conversationId, source } =
+    body;
+
+  if (!name || !phone) {
+    return Response.json(
+      { error: "name and phone are required" },
+      { status: 400 },
+    );
+  }
+
+  const service = createServiceClient();
+  const { data, error } = await service
+    .from("leads")
+    .insert({
+      name,
+      phone,
+      service_interest: serviceInterest ?? null,
+      preferred_date: preferredDate ?? null,
+      conversation_id: conversationId ?? null,
+      source: source ?? "chat",
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    console.error("[api/leads] insert failed:", error);
+    return Response.json({ error: "Failed to save lead" }, { status: 500 });
+  }
+
+  return Response.json({ success: true, leadId: data.id });
 }

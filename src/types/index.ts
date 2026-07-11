@@ -98,7 +98,7 @@ export interface LeadRequestBody {
   serviceInterest?: string;
   preferredDate?: string;
   conversationId?: string;
-  source: LeadSource;
+  source?: LeadSource;
 }
 
 export interface KnowledgeUploadResponse {
