@@ -46,5 +46,26 @@ export async function POST(request: Request) {
     return Response.json({ error: "Failed to save lead" }, { status: 500 });
   }
 
+  // Fire Make.com webhook (fire-and-forget, never blocks response)
+  const webhookUrl = process.env.MAKECOM_WEBHOOK_URL;
+  if (webhookUrl) {
+    fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        phone,
+        serviceInterest: serviceInterest ?? null,
+        preferredDate: preferredDate ?? null,
+        notes: message ?? null,
+        source: source ?? "chat",
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch((err) => {
+      // Log but never throw — lead is already saved, notification is best-effort
+      console.error("[api/leads] Make.com webhook failed:", err);
+    });
+  }
+
   return Response.json({ success: true, leadId: data.id });
 }
