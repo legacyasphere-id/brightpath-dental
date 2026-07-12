@@ -41,3 +41,15 @@ export async function retrieveContext(
     similarity: row.similarity,
   }));
 }
+
+export function detectLanguage(text: string): "id" | "en" {
+  const idIndicators = [
+    "apa", "berapa", "bagaimana", "apakah", "dimana", "kapan",
+    "boleh", "bisa", "tolong", "saya", "mau", "ingin", "harga",
+    "dokter", "gigi", "klinik", "jadwal", "janji", "daftar",
+    "kawat", "tambal", "cabut", "scaling", "bpjs",
+  ];
+  const lower = text.toLowerCase();
+  const idMatches = idIndicators.filter((w) => lower.includes(w)).length;
+  return idMatches >= 2 ? "id" : "en";
+}
