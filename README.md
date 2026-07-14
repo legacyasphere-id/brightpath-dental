@@ -1,54 +1,48 @@
-# BrightPath Dental — AI Business Platform Demo
+# BrightPath Dental — AI Business Platform
 
-> **AI-powered dental clinic platform** — marketing website + RAG knowledge assistant + lead capture + admin dashboard. Built as the first vertical of Legacya Sphere's reusable AI Business Platform.
+AI-powered dental clinic platform built by [Legacya Sphere](https://legacya-portofolio.vercel.app). Marketing website + RAG knowledge assistant + lead capture + automated lead notifications + admin dashboard.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Stack: Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org)
-[![Stack: Supabase](https://img.shields.io/badge/Supabase-pgvector-green)](https://supabase.com)
+**Live:** [brightpath-dental.vercel.app](https://brightpath-dental.vercel.app)
 
 ---
 
 ## What This Is
 
-BrightPath Dental is a **production-ready demo** of the Legacya Sphere AI Business Platform — a reusable architecture that can be deployed for any industry (clinics, agencies, consultants, SMEs) with minimal customization.
+BrightPath Dental is a production-ready client delivery — the first vertical of Legacya Sphere's reusable AI Business Platform. The same architecture (RAG engine, lead capture, admin panel, automation) can be deployed for any industry with minimal customization.
 
-The platform solves the core pipeline every client business needs:
+The core pipeline:
 
 ```
-Marketing Website → AI Chat (RAG) → Lead Capture → Admin Dashboard
+Marketing Website → AI Chat (RAG) → Lead Capture → Make.com → Notification → Admin Dashboard
 ```
 
-**The AI assistant is trained on the clinic's own documents** — services, pricing, doctor profiles, FAQs, policies — and answers patient questions instantly, 24/7, without staff involvement.
-
----
-
-## Live Demo
-
-> Coming soon — deploy your own in under 10 minutes.
+The AI assistant is trained on the clinic's own documents — services, pricing, doctor profiles, FAQs — and answers patient questions 24/7 without staff involvement. New leads fire a webhook to Make.com, which can route a notification (WhatsApp, email, Telegram — whatever's configured on the Make.com scenario) to the clinic.
 
 ---
 
 ## Features
 
-### Patient-Facing
-- ✅ Premium marketing website (services, doctors, pricing, testimonials)
-- ✅ AI chat widget — answers questions from the clinic's knowledge base
-- ✅ Transparent service pricing on homepage
-- ✅ Lead capture form — no login, no app download required
-- ✅ Mobile-first, sub-3s load time
+**Patient-Facing**
+- Premium marketing website (services, doctors, pricing, testimonials)
+- AI chat widget — answers questions from the clinic's knowledge base
+- Bahasa Indonesia auto-detection — AI responds in the patient's language
+- Lead capture form — no login, no app download required
+- Mobile-first, sub-3s load time
 
-### AI Layer
-- ✅ RAG pipeline — Upload clinic documents → AI answers from them
-- ✅ Lead detection — AI surfaces booking form when intent is detected
-- ✅ Conversation history saved to Supabase
-- ✅ Source attribution — AI cites which document it answered from
+**AI Layer**
+- RAG pipeline — upload clinic documents → AI answers from them
+- Lead detection — AI surfaces booking form when intent is detected
+- Bahasa Indonesia / English auto-detect on every message
 
-### Admin Dashboard
-- ✅ Real-time lead inbox — new leads appear instantly
-- ✅ Knowledge base management — upload PDFs, DOCX, TXT
-- ✅ Chat history review — see what patients asked
-- ✅ Supabase Auth — secure admin access
+**Automation**
+- Make.com webhook fires on every new lead — wrapped in `next/server`'s `after()` so it survives the serverless function returning its response
+- Webhook URL is configurable via env var — route it to WhatsApp, email, Slack, Telegram, or any HTTP target via a Make.com scenario
+- Fire-and-forget: a Make.com outage never delays or breaks lead capture
+
+**Admin Dashboard**
+- Lead inbox — all captured leads with name, phone, service interest, notes
+- Knowledge base management — upload PDFs, DOCX, TXT with drag & drop
+- Supabase Auth — secure admin access
 
 ---
 
@@ -56,13 +50,14 @@ Marketing Website → AI Chat (RAG) → Lead Capture → Admin Dashboard
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 15 + TypeScript |
+| Framework | Next.js 15 (App Router) + TypeScript |
 | Styling | Tailwind CSS v4 |
 | Database | Supabase (PostgreSQL + pgvector) |
 | Auth | Supabase Auth |
-| AI | OpenAI API (embeddings + chat) |
-| Deployment | Vercel (Edge Functions) |
-| Storage | Supabase Storage (document uploads) |
+| AI | GPT-4o-mini (chat) + text-embedding-3-small (RAG), via OpenRouter |
+| Automation | Make.com webhook |
+| Deployment | Vercel |
+| Testing | Playwright (E2E) + Vitest (unit) |
 
 ---
 
@@ -72,66 +67,36 @@ Marketing Website → AI Chat (RAG) → Lead Capture → Admin Dashboard
 brightpath-dental/
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx                    # Marketing homepage
-│   │   ├── admin/                      # Protected admin area
-│   │   │   ├── page.tsx                # Dashboard overview
-│   │   │   ├── leads/page.tsx          # Leads inbox
-│   │   │   └── knowledge/page.tsx      # Knowledge base management
+│   │   ├── page.tsx                        # Marketing homepage
+│   │   ├── admin/
+│   │   │   ├── login/page.tsx              # Admin sign-in
+│   │   │   └── (protected)/                # Auth-guarded admin routes
+│   │   │       ├── layout.tsx              # Auth guard
+│   │   │       ├── page.tsx                # Dashboard overview
+│   │   │       ├── leads/page.tsx          # Leads inbox
+│   │   │       └── knowledge/page.tsx      # Knowledge base management
 │   │   └── api/
-│   │       ├── chat/route.ts           # RAG chat endpoint
-│   │       ├── leads/route.ts          # Lead capture endpoint
-│   │       └── knowledge/route.ts      # Document upload + embedding
+│   │       ├── chat/route.ts               # RAG chat endpoint (SSE streaming)
+│   │       ├── leads/route.ts              # Lead capture + Make.com webhook
+│   │       └── knowledge/route.ts          # Document upload + embedding
 │   ├── components/
-│   │   ├── marketing/                  # Homepage sections
-│   │   │   ├── Hero.tsx
-│   │   │   ├── Services.tsx
-│   │   │   ├── Doctors.tsx
-│   │   │   ├── AIDemo.tsx
-│   │   │   ├── Pricing.tsx
-│   │   │   ├── Testimonials.tsx
-│   │   │   └── LeadForm.tsx
-│   │   ├── chat/                       # AI chat widget
-│   │   │   ├── ChatWidget.tsx          # Floating button + panel
-│   │   │   ├── ChatMessage.tsx
-│   │   │   └── LeadCapture.tsx         # Inline form in chat
-│   │   └── admin/                      # Admin UI components
-│   │       ├── LeadsTable.tsx
-│   │       ├── KnowledgeUpload.tsx
-│   │       └── StatsCard.tsx
-│   └── lib/
-│       ├── supabase/
-│       │   ├── client.ts               # Browser Supabase client
-│       │   └── server.ts               # Server Supabase client
-│       └── ai/
-│           ├── embeddings.ts           # OpenAI text-embedding-3-small
-│           ├── retrieval.ts            # pgvector similarity search
-│           ├── prompts.ts              # System prompt builder
-│           └── chat.ts                 # GPT-4o-mini + lead detection
+│   │   ├── marketing/                      # Homepage sections
+│   │   ├── chat/                           # AI chat widget
+│   │   └── admin/                          # Admin UI (LeadsTable, KnowledgeUpload)
+│   ├── lib/
+│   │   ├── supabase/                       # Browser + server clients
+│   │   └── ai/                             # Embeddings, retrieval, prompts, chat
+│   ├── types/                              # Shared TypeScript types
+│   └── __tests__/                          # Vitest unit tests
+├── tests/                                  # Playwright E2E tests
+│   ├── homepage.spec.ts
+│   ├── chat.spec.ts
+│   ├── lead-form.spec.ts
+│   └── admin.spec.ts
 ├── supabase/
-│   └── migrations/
-│       └── 001_initial_schema.sql      # All tables + pgvector setup
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── RAG_FLOW.md
-│   └── DEPLOYMENT.md
+│   └── migrations/                         # All tables + pgvector setup
 ├── .env.example
 └── README.md
-```
-
----
-
-## Database Schema
-
-```sql
--- Core tables
-users                   -- Supabase Auth (admin users)
-documents               -- Uploaded knowledge base files
-document_chunks         -- Text chunks from documents
-embeddings              -- pgvector embeddings (1536 dims)
-conversations           -- Chat sessions
-messages                -- Individual chat messages
-leads                   -- Captured patient leads
-settings                -- Clinic configuration (name, colors, etc.)
 ```
 
 ---
@@ -139,7 +104,6 @@ settings                -- Clinic configuration (name, colors, etc.)
 ## Getting Started
 
 ### 1. Clone and install
-
 ```bash
 git clone https://github.com/legacyasphere-id/brightpath-dental.git
 cd brightpath-dental
@@ -147,55 +111,48 @@ npm install
 ```
 
 ### 2. Set up Supabase
-
+Create a project at [supabase.com](https://supabase.com), then run the migration:
 ```bash
-# Install Supabase CLI
-npm install -g supabase
-
-# Start local Supabase (or use cloud project)
-supabase start
-
-# Run migrations
-supabase db push
+# Paste contents of supabase/migrations/001_initial_schema.sql into the Supabase SQL Editor
 ```
 
 ### 3. Configure environment
-
 ```bash
 cp .env.example .env.local
-# Fill in your keys (see .env.example)
+# Fill in your keys (see Environment Variables below)
 ```
 
 ### 4. Run development server
-
 ```bash
 npm run dev
-# → http://localhost:3000 (marketing site)
-# → http://localhost:3000/admin (admin dashboard)
+# → http://localhost:3000        (marketing site)
+# → http://localhost:3000/admin  (admin dashboard)
+```
+
+### 5. Run tests
+```bash
+npm run test          # Playwright E2E (requires dev server running)
+npm run test:unit     # Unit tests (Vitest)
 ```
 
 ---
 
 ## Environment Variables
 
-See [`.env.example`](.env.example) for the full list. Required keys:
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
+# AI (via OpenRouter)
+OPENAI_API_KEY=
+
+# Make.com (optional — skip to disable lead notifications)
+MAKECOM_WEBHOOK_URL=
 ```
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
-SUPABASE_SERVICE_ROLE_KEY
-OPENAI_API_KEY
-```
 
----
-
-## Definition of Done (MVP)
-
-- [ ] Upload clinic documents (PDF, DOCX, TXT)
-- [ ] AI answers questions using retrieved document context
-- [ ] Visitor submits lead via chat or homepage form
-- [ ] Lead appears in admin dashboard in real time
-- [ ] Application deploys successfully on Vercel
+See [`.env.example`](.env.example) for the full list.
 
 ---
 
@@ -203,22 +160,22 @@ OPENAI_API_KEY
 
 | Version | Features |
 |---------|---------|
-| **v1 (MVP)** | Marketing site + AI chat + Lead capture + Admin dashboard |
-| v2 | WhatsApp integration + Booking system |
-| v3 | Stripe payments + CRM + Analytics |
+| v1 (shipped) | Marketing site · AI chat (RAG) · Lead capture · Make.com automation · Admin dashboard |
+| v2 | Booking calendar · WhatsApp Business integration |
+| v3 | Stripe payments · CRM · Analytics |
 | v4 | Multi-clinic / multi-tenant support |
-| v5 | Voice AI + Multilingual support |
+| v5 | Voice AI · Multilingual support |
 
 ---
 
 ## Reusability
 
-This platform is designed to be deployed for any industry by changing:
-1. The knowledge base content (upload different documents)
-2. The design tokens (colors, fonts, logo)
-3. The clinic/business settings (name, services, contact)
+Deploy for any industry by changing:
+- The knowledge base content (upload different documents)
+- The design tokens (colors, fonts, logo)
+- The clinic/business name and contact info
 
-The architecture — RAG engine, lead capture, admin dashboard — is identical across all verticals.
+The architecture — RAG engine, lead capture, admin dashboard, automation — is identical across all verticals.
 
 **Target industries:** Dental clinics · GP clinics · Law firms · Accounting firms · Consultants · SMEs
 
@@ -226,8 +183,8 @@ The architecture — RAG engine, lead capture, admin dashboard — is identical 
 
 ## Built By
 
-**Legacya Sphere** — AI-Native Business Systems Studio  
-[legacya-portofolio.vercel.app](https://legacya-portofolio.vercel.app) · Bekasi, Indonesia
+[Legacya Sphere](https://legacya-portofolio.vercel.app) — AI-Native Business Systems Studio
+Bekasi, Indonesia
 
 ---
 
