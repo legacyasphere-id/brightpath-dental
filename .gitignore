@@ -31,3 +31,9 @@ next-env.d.ts
 
 # Uploads (local dev only)
 public/uploads/
+
+# Test output
+test-results/
+playwright-report/
+blob-report/
+
