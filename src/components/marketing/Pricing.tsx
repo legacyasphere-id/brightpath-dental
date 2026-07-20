@@ -42,13 +42,13 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="bg-clinic-surface px-6 py-20">
+    <section id="pricing" className="bg-clinic-surface px-6 py-24 md:py-32">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
-          <p className="font-mono text-xs uppercase tracking-widest text-clinic-mint">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">
             Transparent Pricing
           </p>
-          <h2 className="mt-2 font-sans text-3xl font-bold text-clinic-text">
+          <h2 className="mt-2 font-sans text-4xl font-light tracking-tight text-clinic-text">
             Pricing
           </h2>
           <p className="mt-3 text-clinic-body">

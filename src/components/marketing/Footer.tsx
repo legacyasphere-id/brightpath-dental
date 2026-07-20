@@ -1,3 +1,5 @@
+import { MapPin, Phone, Clock } from "lucide-react";
+
 export function Footer() {
   return (
     <footer className="border-t border-clinic-border bg-clinic-surface px-6 py-12">
@@ -53,7 +55,7 @@ export function Footer() {
             </h4>
             <ul className="mt-4 space-y-3 text-sm text-clinic-body">
               <li className="flex gap-2.5">
-                <span className="mt-0.5 flex-shrink-0">📍</span>
+                <MapPin size={16} className="mt-0.5 flex-shrink-0 text-clinic-muted" />
                 <span>
                   Jl. Ahmad Yani No. 45, Bekasi Selatan,
                   <br />
@@ -61,7 +63,7 @@ export function Footer() {
                 </span>
               </li>
               <li className="flex gap-2.5">
-                <span>📞</span>
+                <Phone size={16} className="mt-0.5 flex-shrink-0 text-clinic-muted" />
                 <a
                   href="tel:+622188888888"
                   className="transition-colors hover:text-clinic-navy"
@@ -70,7 +72,7 @@ export function Footer() {
                 </a>
               </li>
               <li className="flex gap-2.5">
-                <span>🕐</span>
+                <Clock size={16} className="mt-0.5 flex-shrink-0 text-clinic-muted" />
                 <span>
                   Mon–Sat: 08.00–20.00
                   <br />

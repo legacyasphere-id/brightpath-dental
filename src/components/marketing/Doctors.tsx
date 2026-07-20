@@ -11,26 +11,26 @@ const doctors = [
     specialty: "Orthodontics",
     bio: "Specialist in metal braces, ceramic braces, and clear aligner systems. Trusted by 2,000+ orthodontic patients.",
     initials: "BS",
-    bg: "bg-clinic-mint",
+    bg: "bg-clinic-teal",
   },
   {
     name: "drg. Citra Dewi",
     specialty: "Pediatric & General Dentistry",
     bio: "Gentle approach for patients of all ages, with specialized training in child-friendly dental techniques.",
     initials: "CD",
-    bg: "bg-blue-500",
+    bg: "bg-clinic-navyDark",
   },
 ];
 
 export function Doctors() {
   return (
-    <section id="doctors" className="bg-clinic-surface px-6 py-20">
+    <section id="doctors" className="bg-clinic-surface px-6 py-24 md:py-32">
       <div className="mx-auto max-w-6xl">
         <div className="mb-12">
-          <p className="font-mono text-xs uppercase tracking-widest text-clinic-mint">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">
             Meet the Team
           </p>
-          <h2 className="mt-2 font-sans text-3xl font-bold text-clinic-text">
+          <h2 className="mt-2 font-sans text-4xl font-light tracking-tight text-clinic-text">
             Our Doctors
           </h2>
           <p className="mt-3 max-w-xl text-clinic-body">
