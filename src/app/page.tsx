@@ -1,5 +1,6 @@
 import { Nav } from "@/components/marketing/Nav";
 import { Hero } from "@/components/marketing/Hero";
+import { ProofStrip } from "@/components/marketing/ProofStrip";
 import { Services } from "@/components/marketing/Services";
 import { WhyUs } from "@/components/marketing/WhyUs";
 import { AIDemo } from "@/components/marketing/AIDemo";
@@ -15,6 +16,7 @@ export default function Home() {
       <Nav />
       <main>
         <Hero />
+        <ProofStrip />
         <Services />
         <WhyUs />
         <AIDemo />

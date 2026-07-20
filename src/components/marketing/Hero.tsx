@@ -1,3 +1,5 @@
+import { MessageCircle } from "lucide-react";
+
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-clinic-bg">
@@ -7,7 +9,7 @@ export function Hero() {
         <div className="absolute right-32 bottom-0 h-64 w-64 translate-y-1/3 rounded-full bg-clinic-navy opacity-5" />
       </div>
 
-      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+      <div className="mx-auto max-w-6xl px-6 py-24 md:py-40">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Left — copy */}
           <div>
@@ -15,9 +17,9 @@ export function Hero() {
               <span className="h-1.5 w-1.5 rounded-full bg-clinic-mint" />
               Dental Clinic · Bekasi
             </span>
-            <h1 className="mt-6 font-sans text-4xl font-extrabold leading-tight text-clinic-text md:text-5xl">
+            <h1 className="mt-6 font-sans text-5xl font-light tracking-tight leading-[1.05] text-clinic-text md:text-6xl">
               Modern dental care,{" "}
-              <span className="text-clinic-navy">built around you.</span>
+              <span className="font-semibold text-clinic-navy">built around you.</span>
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-clinic-body">
               Premium dental treatment backed by experienced specialists, modern
@@ -40,9 +42,10 @@ export function Hero() {
               </a>
               <a
                 href="#ai-demo"
-                className="inline-flex items-center gap-2 rounded-lg border border-clinic-border bg-white px-6 py-3 font-semibold text-clinic-navy transition-colors hover:bg-clinic-bg"
+                className="inline-flex items-center gap-2 rounded-lg border border-clinic-mint/20 bg-clinic-mintLight px-6 py-3 font-semibold text-clinic-navy transition-colors hover:bg-white"
               >
-                <span aria-hidden>💬</span> Ask our AI
+                <MessageCircle size={20} strokeWidth={1.75} />
+                Ask our AI
               </a>
             </div>
 
@@ -67,7 +70,7 @@ export function Hero() {
           {/* Right — visual card (DanPhe-inspired: dark panel with feature checklist) */}
           <div className="hidden lg:block">
             <div className="rounded-2xl bg-clinic-navy p-8 text-white shadow-xl">
-              <p className="font-mono text-xs uppercase tracking-widest text-clinic-mint">
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-mint">
                 Why patients choose us
               </p>
               <h3 className="mt-3 font-sans text-xl font-bold">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2 } from "lucide-react";
 
 const services = [
   "General Check-up & Cleaning",
@@ -61,13 +62,13 @@ export function LeadForm() {
     "w-full rounded-lg border border-clinic-border px-4 py-2.5 text-sm text-clinic-text placeholder:text-clinic-muted focus:border-clinic-navy focus:outline-none focus:ring-1 focus:ring-clinic-navy";
 
   return (
-    <section id="lead-form" className="bg-clinic-mintLight px-6 py-20">
+    <section id="lead-form" className="bg-clinic-mintLight px-6 py-24 md:py-32">
       <div className="mx-auto max-w-2xl">
         <div className="mb-10 text-center">
-          <p className="font-mono text-xs uppercase tracking-widest text-clinic-mint">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">
             Get In Touch
           </p>
-          <h2 className="mt-2 font-sans text-3xl font-bold text-clinic-text">
+          <h2 className="mt-2 font-sans text-4xl font-light tracking-tight text-clinic-text">
             Book an appointment
           </h2>
           <p className="mt-3 text-clinic-body">
@@ -78,7 +79,9 @@ export function LeadForm() {
 
         {status === "success" ? (
           <div className="rounded-xl border border-clinic-mint/30 bg-white p-10 text-center shadow-sm">
-            <span className="text-5xl">✅</span>
+            <div className="flex justify-center">
+              <CheckCircle2 size={48} className="text-clinic-mint" />
+            </div>
             <h3 className="mt-4 font-sans text-xl font-bold text-clinic-text">
               Booking Received!
             </h3>

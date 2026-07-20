@@ -12,6 +12,7 @@ const config: Config = {
           surface: "#FFFFFF", // cards and panels
           navy: "#1B4F72", // primary brand — nav, buttons, headings
           navyDark: "#154360", // hover states
+          teal: "#2E7D8C", // secondary accent — avatars, non-mint highlights
           mint: "#2ECC71", // accent — chat widget, badges, highlights
           mintLight: "#F0FAF5", // AI chat background, light sections
           text: "#1A1A2E", // near-black — all headings
