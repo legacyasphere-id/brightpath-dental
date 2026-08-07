@@ -8,7 +8,7 @@ const testimonials = [
   },
   {
     quote:
-      "Proses pasang kawat giginya profesional banget. AI chat-nya juga sangat membantu — saya bisa tanya-tanya kapan pun tanpa harus telepon klinik.",
+      "Proses pasang kawat giginya profesional banget. AI chat-nya juga sangat membantu. Saya bisa tanya-tanya kapan pun tanpa harus telepon klinik.",
     name: "Dimas P.",
     treatment: "Orthodontic Braces",
     stars: 5,
@@ -34,8 +34,7 @@ export function Testimonials() {
             What patients say
           </h2>
           <p className="mt-3 max-w-xl text-clinic-body">
-            Real feedback from real patients. We never edit or manufacture
-            reviews.
+            Real feedback from real patients.
           </p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

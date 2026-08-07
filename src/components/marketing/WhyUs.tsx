@@ -5,13 +5,13 @@ const reasons: { icon: LucideIcon; title: string; description: string }[] = [
     icon: Bot,
     title: "AI-Powered Assistance",
     description:
-      "Get instant answers 24/7 via our intelligent AI assistant — from pricing to procedure details, in Bahasa or English.",
+      "Get instant answers 24/7 via our intelligent AI assistant. Ask about pricing or procedure details in Bahasa or English.",
   },
   {
     icon: Microscope,
     title: "Modern Equipment",
     description:
-      "Digital X-rays, CAD/CAM same-day crowns, and sterilization protocols that exceed Indonesian health standards.",
+      "Digital X-rays, CAD/CAM same-day crowns, and autoclave sterilization for every instrument between patients.",
   },
   {
     icon: BadgeCheck,
@@ -27,13 +27,6 @@ const reasons: { icon: LucideIcon; title: string; description: string }[] = [
   },
 ];
 
-const stats = [
-  { value: "5,000+", label: "Patients treated" },
-  { value: "10+", label: "Years operating" },
-  { value: "3", label: "Dental specialists" },
-  { value: "98%", label: "Patient satisfaction" },
-];
-
 export function WhyUs() {
   return (
     <section className="bg-clinic-navy px-6 py-24 text-white md:py-32">
@@ -46,8 +39,8 @@ export function WhyUs() {
             Why BrightPath?
           </h2>
           <p className="mt-3 max-w-xl text-white/65">
-            We combine clinical expertise with modern technology to deliver a
-            dental experience that&apos;s genuinely different.
+            We combine clinical expertise with modern technology for every
+            patient visit.
           </p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -70,18 +63,6 @@ export function WhyUs() {
               </div>
             );
           })}
-        </div>
-
-        {/* Stats bar */}
-        <div className="mt-14 grid grid-cols-2 gap-6 border-t border-white/10 pt-10 sm:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="font-sans text-3xl font-extrabold text-clinic-mint">
-                {s.value}
-              </p>
-              <p className="mt-1 text-xs text-white/50">{s.label}</p>
-            </div>
-          ))}
         </div>
       </div>
     </section>

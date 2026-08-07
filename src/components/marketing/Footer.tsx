@@ -65,10 +65,10 @@ export function Footer() {
               <li className="flex gap-2.5">
                 <Phone size={16} className="mt-0.5 flex-shrink-0 text-clinic-muted" />
                 <a
-                  href="tel:+622188888888"
+                  href="tel:+622129467180"
                   className="transition-colors hover:text-clinic-navy"
                 >
-                  +62 21-8888-8888
+                  +62 21-2946-7180
                 </a>
               </li>
               <li className="flex gap-2.5">
@@ -89,7 +89,7 @@ export function Footer() {
             © {new Date().getFullYear()} BrightPath Dental. All rights
             reserved.
           </p>
-          <p>Built with AI · Powered by Legacya Sphere</p>
+          <p>Powered by Legacya Sphere · Demo project</p>
         </div>
       </div>
     </footer>

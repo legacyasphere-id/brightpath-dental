@@ -29,9 +29,9 @@ export function AIDemo() {
             Ask our AI assistant
           </h2>
           <p className="mt-3 max-w-lg text-clinic-body">
-            Have a question about a procedure, pricing, or availability? Our AI
-            answers instantly — in Bahasa Indonesia or English, around the
-            clock.
+            Have a question about a procedure, pricing, or availability? Our
+            AI answers instantly. Ask in Bahasa Indonesia or English, any
+            time of day.
           </p>
 
           {/* Sample questions chips */}

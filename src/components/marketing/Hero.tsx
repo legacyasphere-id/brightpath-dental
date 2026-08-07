@@ -22,9 +22,9 @@ export function Hero() {
               <span className="font-semibold text-clinic-navy">built around you.</span>
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-clinic-body">
-              Premium dental treatment backed by experienced specialists, modern
-              equipment, and an AI assistant that answers your questions
-              instantly — any time of day.
+              Premium dental treatment backed by experienced specialists,
+              modern equipment, and an AI assistant that answers your
+              questions instantly. Available any time of day.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <a
@@ -84,7 +84,6 @@ export function Hero() {
                   "AI-powered patient assistant (24/7)",
                   "Digital X-ray & same-day results",
                   "Specialist dentists on staff",
-                  "Sterilization above Indonesian standard",
                   "Easy WhatsApp appointment booking",
                   "BPJS & private insurance accepted",
                 ].map((item) => (
@@ -112,7 +111,7 @@ export function Hero() {
                   </p>
                 </div>
                 <p className="mt-2 text-xs text-white/50">
-                  &ldquo;What&apos;s the cost of teeth whitening?&rdquo; — ask
+                  &ldquo;What&apos;s the cost of teeth whitening?&rdquo; Ask
                   anything, get an instant answer.
                 </p>
               </div>

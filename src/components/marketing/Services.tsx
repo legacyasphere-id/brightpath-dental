@@ -19,7 +19,7 @@ const services: { icon: LucideIcon; title: string; description: string }[] = [
     icon: Sparkles,
     title: "Teeth Whitening",
     description:
-      "Professional-grade bleaching treatments for noticeably whiter teeth — results in a single session.",
+      "Professional-grade bleaching treatments for noticeably whiter teeth. Results in a single session.",
   },
   {
     icon: Anchor,
@@ -37,7 +37,7 @@ const services: { icon: LucideIcon; title: string; description: string }[] = [
     icon: ShieldCheck,
     title: "Root Canal Treatment",
     description:
-      "Pain-free endodontic therapy to save infected teeth and eliminate persistent toothaches.",
+      "Root canal treatment with modern anaesthesia to save infected teeth and eliminate persistent toothaches.",
   },
   {
     icon: Baby,
@@ -59,8 +59,8 @@ export function Services() {
             Our Services
           </h2>
           <p className="mt-3 max-w-xl text-clinic-body">
-            From routine check-ups to advanced restorative work — everything
-            under one roof in Bekasi.
+            Our services range from routine check-ups to advanced
+            restorative work. All delivered in Bekasi.
           </p>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
