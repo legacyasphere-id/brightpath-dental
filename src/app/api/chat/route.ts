@@ -1,7 +1,7 @@
 import { after } from "next/server";
 import { retrieveContext, detectLanguage } from "@/lib/ai/retrieval";
 import { buildSystemPrompt } from "@/lib/ai/prompts";
-import { streamChat, errorStream } from "@/lib/ai/chat";
+import { streamChat, errorStream, noContextStream } from "@/lib/ai/chat";
 import { logChatTurn } from "@/lib/supabase/logging";
 import type { ChatRequestBody } from "@/types";
 
@@ -75,6 +75,18 @@ export async function POST(request: Request) {
     return sseResponse(
       errorStream("retrieval_failed", "Failed to retrieve KB context.", language),
     );
+  }
+
+  if (chunks.length === 0) {
+    // Retrieval succeeded but matched nothing — not a throw, so the
+    // retrieval_failed branch above never sees it. Left alone, this handed
+    // the model an empty context block and asked it to answer anyway,
+    // which it did, fluently, from its own general knowledge of dentistry.
+    // On a medical site that means invented prices, credentials, and
+    // services. Zero chunks is a first-class outcome: skip the model
+    // entirely and reply honestly instead of trusting a prompt-level
+    // instruction to catch it. See BRIGHTPATHHANDOFF.md.
+    return sseResponse(noContextStream(language, { sessionId, sources: [] }));
   }
 
   const systemPrompt = buildSystemPrompt(chunks, language);
