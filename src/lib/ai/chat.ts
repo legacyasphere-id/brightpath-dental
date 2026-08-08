@@ -68,6 +68,43 @@ export interface ChatLogContext {
   sources: MessageSource[];
 }
 
+// Shown when retrieveContext() returns zero chunks — no error occurred,
+// the KB just has no confident match for this question. A model handed
+// an empty context block will still answer fluently from its own general
+// knowledge of dentistry, which is exactly the failure this guards
+// against: on a medical site, an invented price, credential, or service
+// is worse than an honest "I don't know." This is not RUN B's error
+// card — nothing is actually broken, so claiming the assistant is
+// unavailable would be its own small lie. See BRIGHTPATHHANDOFF.md for
+// why this must be enforced before the prompt is built rather than by
+// instructing the model harder.
+const NO_CONTEXT_COPY: Record<Language, string> = {
+  id: "Maaf, saya tidak menemukan informasi itu di data klinik kami. Untuk kepastian, silakan hubungi kami langsung di WhatsApp +62 812-2946-7180 dan tim kami akan membantu.",
+  en: "Sorry, I couldn't find that information in our clinic records. For certainty, please contact us directly on WhatsApp at +62 812-2946-7180 and our team will help.",
+};
+
+// A stream that emits the fixed no-context reply as a normal content
+// token, exactly like a real completion would, so the client renders it
+// as an ordinary assistant bubble rather than a special error state.
+// Skips OpenRouter entirely — there is nothing for the model to answer
+// with, so there is no reason to call it. Logged with sources: [] since
+// this is a genuine reply that was actually sent, not a failure marker.
+export function noContextStream(
+  language: Language,
+  logCtx: ChatLogContext,
+): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  const text = NO_CONTEXT_COPY[language];
+  after(() => logChatTurn(logCtx.sessionId, "assistant", text, []));
+  return new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(sseEvent({ content: text })));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+}
+
 // Streams a gpt-4o-mini completion as SSE — `data: {"content": "<token>"}` per
 // chunk, `data: {"requiresLead": true}` once if the accumulated response
 // contains booking intent, then `data: [DONE]` to close. The caller returns
