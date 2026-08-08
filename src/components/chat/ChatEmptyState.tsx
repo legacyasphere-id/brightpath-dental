@@ -1,8 +1,9 @@
+// Ordered shortest first so they wrap more evenly in the flex row.
 const SUGGESTED_QUESTIONS = [
-  "Berapa biaya periksa gigi?",
   "Jam praktik klinik?",
-  "Dokter siapa yang menangani kawat gigi?",
   "Apakah menerima BPJS?",
+  "Berapa biaya periksa gigi?",
+  "Dokter siapa yang menangani kawat gigi?",
 ];
 
 // Static, client-side, no API call — renders instantly on open and still

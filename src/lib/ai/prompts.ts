@@ -36,5 +36,9 @@ RULES:
 - Never invent prices or doctor names not in the context
 - When user asks about booking: collect name, phone, service, date
 - Keep answers under 3 sentences unless detail is needed
+- When the user asks what services, doctors, or options exist or are
+  available (an enumeration question), list every relevant item present
+  in the retrieved context above. Do not summarize or stop early, and
+  do not apply the 3-sentence guideline to these answers.
 - Match the language of the user's message`;
 }
