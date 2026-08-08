@@ -2,6 +2,8 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { embed } from "@/lib/ai/embeddings";
 import type { RetrievedChunk } from "@/types";
 
+export { detectLanguage } from "@/lib/ai/language";
+
 const DEFAULT_THRESHOLD = Number(process.env.RAG_SIMILARITY_THRESHOLD ?? 0.7);
 const DEFAULT_TOP_K = Number(process.env.RAG_TOP_K ?? 5);
 
@@ -40,16 +42,4 @@ export async function retrieveContext(
     content: row.content,
     similarity: row.similarity,
   }));
-}
-
-export function detectLanguage(text: string): "id" | "en" {
-  const idIndicators = [
-    "apa", "berapa", "bagaimana", "apakah", "dimana", "kapan",
-    "boleh", "bisa", "tolong", "saya", "mau", "ingin", "harga",
-    "dokter", "gigi", "klinik", "jadwal", "janji", "daftar",
-    "kawat", "tambal", "cabut", "scaling", "bpjs",
-  ];
-  const lower = text.toLowerCase();
-  const idMatches = idIndicators.filter((w) => lower.includes(w)).length;
-  return idMatches >= 2 ? "id" : "en";
 }

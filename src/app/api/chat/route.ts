@@ -30,6 +30,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "sessionId is required" }, { status: 400 });
   }
 
+  // Computed up front, independent of retrieval, so an error reply follows
+  // the same language rule a successful reply would have used — an error
+  // is still a reply.
+  const language = detectLanguage(message);
+
   let chunks;
   try {
     // retrieveContext() embeds the message and calls the match_embeddings()
@@ -51,16 +56,15 @@ export async function POST(request: Request) {
       error,
     });
     return sseResponse(
-      errorStream("retrieval_failed", "Failed to retrieve KB context."),
+      errorStream("retrieval_failed", "Failed to retrieve KB context.", language),
     );
   }
 
-  const language = detectLanguage(message);
   const systemPrompt = buildSystemPrompt(chunks, language);
 
   // streamChat() never throws — a failure to start the completion resolves
   // to an error-and-close stream internally, so this is always a valid SSE
   // response body.
-  const stream = await streamChat(systemPrompt, message);
+  const stream = await streamChat(systemPrompt, message, language);
   return sseResponse(stream);
 }

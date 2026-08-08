@@ -6,7 +6,7 @@ test.describe('Chat error handling', () => {
   }) => {
     await page.route('**/api/chat', async (route) => {
       const body =
-        'event: error\ndata: {"code":"model_failed","message":"mocked failure"}\n\n' +
+        'event: error\ndata: {"code":"model_failed","message":"mocked failure","language":"id"}\n\n' +
         'data: [DONE]\n\n';
       await route.fulfill({
         status: 200,
@@ -45,5 +45,35 @@ test.describe('Chat error handling', () => {
     for (const text of bubbleTexts) {
       expect(text.trim().length).toBeGreaterThan(0);
     }
+  });
+
+  test('the error card follows the reply language rule — English message gets English copy', async ({
+    page,
+  }) => {
+    await page.route('**/api/chat', async (route) => {
+      const body =
+        'event: error\ndata: {"code":"model_failed","message":"mocked failure","language":"en"}\n\n' +
+        'data: [DONE]\n\n';
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        body,
+      });
+    });
+
+    await page.goto('/');
+    await page.locator('button[aria-label="Open chat"]').click();
+
+    const input = page.locator(
+      'input[placeholder="Ask about services, pricing, or doctors..."]'
+    );
+    await input.fill('What services do you offer?');
+    await page.getByRole('button', { name: 'Send' }).click();
+    await expect(input).toBeEnabled({ timeout: 10000 });
+
+    await expect(
+      page.getByText('Please contact us directly on')
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible();
   });
 });

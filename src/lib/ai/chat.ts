@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import type { ChatErrorCode } from "@/types";
+import type { Language } from "@/lib/ai/language";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -33,8 +34,12 @@ function sseEvent(payload: Record<string, unknown>): string {
   return `data: ${JSON.stringify(payload)}\n\n`;
 }
 
-function sseErrorEvent(code: ChatErrorCode, message: string): string {
-  return `event: error\ndata: ${JSON.stringify({ code, message })}\n\n`;
+function sseErrorEvent(
+  code: ChatErrorCode,
+  message: string,
+  language: Language,
+): string {
+  return `event: error\ndata: ${JSON.stringify({ code, message, language })}\n\n`;
 }
 
 // A stream that immediately emits a structured error event and closes.
@@ -44,11 +49,12 @@ function sseErrorEvent(code: ChatErrorCode, message: string): string {
 export function errorStream(
   code: ChatErrorCode,
   message: string,
+  language: Language,
 ): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder();
   return new ReadableStream({
     start(controller) {
-      controller.enqueue(encoder.encode(sseErrorEvent(code, message)));
+      controller.enqueue(encoder.encode(sseErrorEvent(code, message, language)));
       controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       controller.close();
     },
@@ -62,6 +68,7 @@ export function errorStream(
 export async function streamChat(
   systemPrompt: string,
   userMessage: string,
+  language: Language,
 ): Promise<ReadableStream<Uint8Array>> {
   let completion;
   try {
@@ -78,6 +85,7 @@ export async function streamChat(
     return errorStream(
       "model_failed",
       "OpenRouter request failed to start.",
+      language,
     );
   }
 
@@ -111,6 +119,7 @@ export async function streamChat(
             sseErrorEvent(
               "unknown",
               "Model stream closed with zero content.",
+              language,
             ),
           ),
         );
@@ -121,7 +130,7 @@ export async function streamChat(
       console.error("[ai/chat] model_failed — stream interrupted mid-response:", error);
       await writer.write(
         encoder.encode(
-          sseErrorEvent("model_failed", "OpenRouter stream interrupted."),
+          sseErrorEvent("model_failed", "OpenRouter stream interrupted.", language),
         ),
       );
     } finally {

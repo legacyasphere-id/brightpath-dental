@@ -100,6 +100,10 @@ export type ChatErrorCode = "retrieval_failed" | "model_failed" | "unknown";
 export interface ChatErrorPayload {
   code: ChatErrorCode;
   message: string;
+  // Same detection the reply itself would have used (detectLanguage()),
+  // so the error card can follow RUN 1's language rule — an error is
+  // still a reply.
+  language: "id" | "en";
 }
 
 export interface LeadRequestBody {

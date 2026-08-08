@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { ChatMessage, type ChatMessageData } from "./ChatMessage";
 import { LeadCapture } from "./LeadCapture";
+import { detectLanguage, type Language } from "@/lib/ai/language";
 
 export function ChatPanel({ onClose }: { onClose: () => void }) {
   const [sessionId] = useState(() => crypto.randomUUID());
@@ -34,11 +35,16 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
     ]);
     setLoading(true);
 
-    function finalizeError() {
+    // Client-side fallback for failures that never reach a server error
+    // payload (fetch itself throwing, a non-SSE response) — same detector
+    // the server uses, so the error card still follows the language rule.
+    const fallbackLanguage: Language = detectLanguage(text);
+
+    function finalizeError(language: Language = fallbackLanguage) {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantId
-            ? { ...m, status: "error", retryText: text }
+            ? { ...m, status: "error", retryText: text, errorLanguage: language }
             : m,
         ),
       );
@@ -86,7 +92,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
 
           if (eventType === "error") {
             sawError = true;
-            finalizeError();
+            finalizeError(parsed.language ?? fallbackLanguage);
             continue;
           }
 
@@ -115,7 +121,12 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
           prev.map((m) =>
             m.id === assistantId
               ? m.content === ""
-                ? { ...m, status: "error", retryText: text }
+                ? {
+                    ...m,
+                    status: "error",
+                    retryText: text,
+                    errorLanguage: fallbackLanguage,
+                  }
                 : { ...m, status: "done" }
               : m,
           ),
