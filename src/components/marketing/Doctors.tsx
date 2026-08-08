@@ -1,24 +1,26 @@
+import Image from "next/image";
+
 const doctors = [
   {
     name: "drg. Anisa Rahma, Sp.KG",
     specialty: "Conservative & Cosmetic Dentistry",
     bio: "10+ years specializing in restorative and cosmetic procedures. Graduate of Universitas Indonesia Faculty of Dentistry.",
-    initials: "AR",
-    bg: "bg-clinic-navy",
+    photo: "/images/doctors/anisa-rahma.webp",
+    alt: "drg. Anisa Rahma, Sp.KG — spesialis konservasi gigi dan estetika",
   },
   {
     name: "drg. Budi Santoso, Sp.Ort",
     specialty: "Orthodontics",
     bio: "Specialist in metal braces, ceramic braces, and clear aligner systems. Trusted by 2,000+ orthodontic patients.",
-    initials: "BS",
-    bg: "bg-clinic-teal",
+    photo: "/images/doctors/budi-santoso.webp",
+    alt: "drg. Budi Santoso, Sp.Ort — spesialis ortodontik",
   },
   {
     name: "drg. Citra Dewi",
     specialty: "Pediatric & General Dentistry",
     bio: "Gentle approach for patients of all ages, with specialized training in child-friendly dental techniques.",
-    initials: "CD",
-    bg: "bg-clinic-navyDark",
+    photo: "/images/doctors/citra-dewi.webp",
+    alt: "drg. Citra Dewi — dokter gigi umum dan spesialis anak",
   },
 ];
 
@@ -45,11 +47,13 @@ export function Doctors() {
               className="rounded-xl border border-clinic-border bg-clinic-bg p-6 transition-shadow hover:shadow-md"
             >
               {/* Avatar */}
-              <div
-                className={`flex h-14 w-14 items-center justify-center rounded-full ${doc.bg} font-sans text-lg font-bold text-white`}
-              >
-                {doc.initials}
-              </div>
+              <Image
+                src={doc.photo}
+                alt={doc.alt}
+                width={800}
+                height={800}
+                className="h-14 w-14 rounded-full object-cover"
+              />
               <div className="mt-4">
                 <h3 className="font-sans text-base font-semibold text-clinic-text">
                   {doc.name}
