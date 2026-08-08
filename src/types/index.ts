@@ -92,6 +92,16 @@ export interface ChatResponseSignal {
   requiresLead: boolean;
 }
 
+// retrieval_failed: Supabase/RPC/DNS unreachable while fetching KB context.
+// model_failed: OpenRouter unreachable, 4xx/5xx, or timed out.
+// unknown: anything else, including a stream that closed with zero content.
+export type ChatErrorCode = "retrieval_failed" | "model_failed" | "unknown";
+
+export interface ChatErrorPayload {
+  code: ChatErrorCode;
+  message: string;
+}
+
 export interface LeadRequestBody {
   name: string;
   phone: string;

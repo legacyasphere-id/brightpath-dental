@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import type { ChatErrorCode } from "@/types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -32,6 +33,28 @@ function sseEvent(payload: Record<string, unknown>): string {
   return `data: ${JSON.stringify(payload)}\n\n`;
 }
 
+function sseErrorEvent(code: ChatErrorCode, message: string): string {
+  return `event: error\ndata: ${JSON.stringify({ code, message })}\n\n`;
+}
+
+// A stream that immediately emits a structured error event and closes.
+// Used whenever a failure is known before any content could be streamed,
+// so the client always gets one consistent SSE shape to parse regardless
+// of where in the pipeline the failure happened.
+export function errorStream(
+  code: ChatErrorCode,
+  message: string,
+): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(sseErrorEvent(code, message)));
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      controller.close();
+    },
+  });
+}
+
 // Streams a gpt-4o-mini completion as SSE — `data: {"content": "<token>"}` per
 // chunk, `data: {"requiresLead": true}` once if the accumulated response
 // contains booking intent, then `data: [DONE]` to close. The caller returns
@@ -51,8 +74,11 @@ export async function streamChat(
       ],
     });
   } catch (error) {
-    console.error("[ai/chat] streamChat() failed to start:", error);
-    throw new Error("Failed to start chat completion — OpenAI request failed");
+    console.error("[ai/chat] model_failed — failed to start completion:", error);
+    return errorStream(
+      "model_failed",
+      "OpenRouter request failed to start.",
+    );
   }
 
   const encoder = new TextEncoder();
@@ -71,17 +97,31 @@ export async function streamChat(
         }
       }
 
-      if (detectLead(fullText)) {
+      if (fullText === "") {
+        // The model stream completed without throwing but produced zero
+        // tokens. Left alone this renders as a permanently empty bubble —
+        // treat it as an error rather than a valid (empty) reply. An
+        // assistant message must never end its life with no content and
+        // no error attached.
+        console.error(
+          "[ai/chat] unknown — model stream closed with zero content",
+        );
+        await writer.write(
+          encoder.encode(
+            sseErrorEvent(
+              "unknown",
+              "Model stream closed with zero content.",
+            ),
+          ),
+        );
+      } else if (detectLead(fullText)) {
         await writer.write(encoder.encode(sseEvent({ requiresLead: true })));
       }
     } catch (error) {
-      console.error("[ai/chat] streamChat() failed mid-stream:", error);
+      console.error("[ai/chat] model_failed — stream interrupted mid-response:", error);
       await writer.write(
         encoder.encode(
-          sseEvent({
-            error:
-              "I'm having trouble responding right now — please try again or use the booking form.",
-          }),
+          sseErrorEvent("model_failed", "OpenRouter stream interrupted."),
         ),
       );
     } finally {

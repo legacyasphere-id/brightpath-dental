@@ -10,7 +10,6 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [requiresLead, setRequiresLead] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   function scrollToBottom() {
@@ -19,13 +18,9 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
     });
   }
 
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
-    const text = input.trim();
+  async function sendMessage(text: string) {
     if (!text || loading) return;
 
-    setError(null);
-    setInput("");
     setMessages((prev) => [
       ...prev,
       { id: crypto.randomUUID(), role: "user", content: text },
@@ -35,9 +30,19 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
     const assistantId = crypto.randomUUID();
     setMessages((prev) => [
       ...prev,
-      { id: assistantId, role: "assistant", content: "" },
+      { id: assistantId, role: "assistant", content: "", status: "streaming" },
     ]);
     setLoading(true);
+
+    function finalizeError() {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantId
+            ? { ...m, status: "error", retryText: text }
+            : m,
+        ),
+      );
+    }
 
     try {
       const res = await fetch("/api/chat", {
@@ -47,28 +52,43 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
       });
 
       if (!res.ok || !res.body) {
-        throw new Error("Chat request failed");
+        finalizeError();
+        return;
       }
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let sawError = false;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const events = buffer.split("\n\n");
-        buffer = events.pop() ?? "";
+        const frames = buffer.split("\n\n");
+        buffer = frames.pop() ?? "";
 
-        for (const event of events) {
-          const line = event.trim();
-          if (!line.startsWith("data:")) continue;
-          const payload = line.slice(5).trim();
+        for (const frame of frames) {
+          const lines = frame
+            .split("\n")
+            .map((l) => l.trim())
+            .filter(Boolean);
+          const dataLine = lines.find((l) => l.startsWith("data:"));
+          if (!dataLine) continue;
+
+          const payload = dataLine.slice(5).trim();
           if (payload === "[DONE]") continue;
 
+          const eventLine = lines.find((l) => l.startsWith("event:"));
+          const eventType = eventLine ? eventLine.slice(6).trim() : "message";
           const parsed = JSON.parse(payload);
+
+          if (eventType === "error") {
+            sawError = true;
+            finalizeError();
+            continue;
+          }
 
           if (parsed.content) {
             setMessages((prev) =>
@@ -84,17 +104,36 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
           if (parsed.requiresLead) {
             setRequiresLead(true);
           }
-
-          if (parsed.error) {
-            setError(parsed.error);
-          }
         }
       }
+
+      if (!sawError) {
+        // Guard the silent case: the stream closed with zero content and
+        // no error event ever arrived. An assistant message must never
+        // settle as empty — treat it the same as an explicit error.
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantId
+              ? m.content === ""
+                ? { ...m, status: "error", retryText: text }
+                : { ...m, status: "done" }
+              : m,
+          ),
+        );
+      }
     } catch {
-      setError("Something went wrong — please try again.");
+      finalizeError();
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSend(e: React.FormEvent) {
+    e.preventDefault();
+    const text = input.trim();
+    if (!text || loading) return;
+    setInput("");
+    await sendMessage(text);
   }
 
   return (
@@ -110,10 +149,17 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
 
       <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto p-4">
         {messages.map((message) => (
-          <ChatMessage key={message.id} message={message} />
+          <ChatMessage
+            key={message.id}
+            message={message}
+            onRetry={
+              message.status === "error" && message.retryText
+                ? () => sendMessage(message.retryText!)
+                : undefined
+            }
+          />
         ))}
         {requiresLead && <LeadCapture conversationId={sessionId} />}
-        {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
 
       <form
