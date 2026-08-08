@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { ChatMessage, type ChatMessageData } from "./ChatMessage";
+import { ChatEmptyState } from "./ChatEmptyState";
 import { LeadCapture } from "./LeadCapture";
 import { detectLanguage, type Language } from "@/lib/ai/language";
 
@@ -148,7 +149,7 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 flex h-[600px] w-[400px] max-w-[calc(100vw-3rem)] flex-col rounded-xl border border-clinic-border bg-clinic-surface shadow-2xl">
+    <div className="fixed bottom-24 left-4 right-4 z-50 flex h-[min(620px,calc(100dvh-7rem))] flex-col rounded-xl border border-clinic-border bg-clinic-surface shadow-2xl min-[480px]:left-auto min-[480px]:right-6 min-[480px]:w-[400px]">
       <div className="flex items-center justify-between rounded-t-xl bg-clinic-navy px-4 py-3 text-white">
         <span className="font-sans text-sm font-semibold">
           BrightPath AI · Instant Answers
@@ -159,17 +160,21 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto p-4">
-        {messages.map((message) => (
-          <ChatMessage
-            key={message.id}
-            message={message}
-            onRetry={
-              message.status === "error" && message.retryText
-                ? () => sendMessage(message.retryText!)
-                : undefined
-            }
-          />
-        ))}
+        {messages.length === 0 ? (
+          <ChatEmptyState onSend={sendMessage} />
+        ) : (
+          messages.map((message) => (
+            <ChatMessage
+              key={message.id}
+              message={message}
+              onRetry={
+                message.status === "error" && message.retryText
+                  ? () => sendMessage(message.retryText!)
+                  : undefined
+              }
+            />
+          ))
+        )}
         {requiresLead && <LeadCapture conversationId={sessionId} />}
       </div>
 
