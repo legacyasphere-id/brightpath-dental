@@ -3,10 +3,10 @@
 import { MessageCircle } from "lucide-react";
 
 const sampleQuestions = [
-  "What's the cost of teeth whitening?",
-  "Do you have an orthodontist on staff?",
-  "How long does a root canal take?",
-  "Is BPJS accepted here?",
+  "Berapa biaya pemutihan gigi?",
+  "Apakah ada dokter spesialis ortodonti?",
+  "Berapa lama proses perawatan saluran akar?",
+  "Apakah menerima BPJS?",
 ];
 
 export function AIDemo() {
