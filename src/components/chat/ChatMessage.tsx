@@ -3,6 +3,79 @@ import type { Language } from "@/lib/ai/language";
 
 const WHATSAPP_URL = "https://wa.me/6281229467180";
 
+// Lightweight, safe-by-construction markdown for assistant replies —
+// paragraphs, lists, and bold. No library, no dangerouslySetInnerHTML:
+// text only ever becomes React children, so there is no HTML injection
+// surface to sanitize against in the first place. Structured answers
+// (hours, service lists) collapse into a wall of text without this,
+// since the model emits markdown but a bare <p> renders it as plain
+// text and collapses newlines.
+function parseInlineBold(text: string, keyPrefix: string): React.ReactNode[] {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      return <strong key={`${keyPrefix}-${i}`}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+export function renderMarkdown(content: string): React.ReactNode[] {
+  const lines = content.split("\n");
+  const blocks: React.ReactNode[] = [];
+  let paragraph: string[] = [];
+  let listItems: string[] = [];
+
+  function flushParagraph() {
+    if (paragraph.length > 0) {
+      const key = `p-${blocks.length}`;
+      blocks.push(
+        <p key={key} className={blocks.length > 0 ? "mt-2" : undefined}>
+          {parseInlineBold(paragraph.join(" "), key)}
+        </p>,
+      );
+      paragraph = [];
+    }
+  }
+
+  function flushList() {
+    if (listItems.length > 0) {
+      const key = `ul-${blocks.length}`;
+      blocks.push(
+        <ul
+          key={key}
+          className={`list-disc space-y-0.5 pl-4 ${blocks.length > 0 ? "mt-2" : ""}`}
+        >
+          {listItems.map((item, i) => (
+            <li key={`${key}-${i}`}>{parseInlineBold(item, `${key}-${i}`)}</li>
+          ))}
+        </ul>,
+      );
+      listItems = [];
+    }
+  }
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (line === "") {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+    const listMatch = line.match(/^(?:[-*]|\d+[.)])\s+(.*)/);
+    if (listMatch) {
+      flushParagraph();
+      listItems.push(listMatch[1]);
+    } else {
+      flushList();
+      paragraph.push(line);
+    }
+  }
+  flushParagraph();
+  flushList();
+
+  return blocks;
+}
+
 // An error is still a reply — same language rule as RUN 1: Indonesian by
 // default, English only when the user's message was clearly English. The
 // WhatsApp link/number is identical regardless of language.
@@ -89,17 +162,21 @@ export function ChatMessage({
     );
   }
 
+  if (isUser) {
+    return (
+      <div className="text-right">
+        <p className="inline-block rounded-lg bg-clinic-navy px-3 py-2 text-sm text-white">
+          {message.content}
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className={isUser ? "text-right" : "text-left"}>
-      <p
-        className={
-          isUser
-            ? "inline-block rounded-lg bg-clinic-navy px-3 py-2 text-sm text-white"
-            : "inline-block rounded-lg bg-clinic-mintLight px-3 py-2 text-sm text-clinic-text"
-        }
-      >
-        {message.content}
-      </p>
+    <div className="text-left">
+      <div className="inline-block max-w-[85%] rounded-lg bg-clinic-mintLight px-3 py-2 text-sm text-clinic-text">
+        {renderMarkdown(message.content)}
+      </div>
     </div>
   );
 }
