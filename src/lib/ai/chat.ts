@@ -1,6 +1,8 @@
+import { after } from "next/server";
 import OpenAI from "openai";
-import type { ChatErrorCode } from "@/types";
+import type { ChatErrorCode, MessageSource } from "@/types";
 import type { Language } from "@/lib/ai/language";
+import { logChatTurn } from "@/lib/supabase/logging";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -61,14 +63,29 @@ export function errorStream(
   });
 }
 
+export interface ChatLogContext {
+  sessionId: string;
+  sources: MessageSource[];
+}
+
 // Streams a gpt-4o-mini completion as SSE — `data: {"content": "<token>"}` per
 // chunk, `data: {"requiresLead": true}` once if the accumulated response
 // contains booking intent, then `data: [DONE]` to close. The caller returns
 // this directly as a Response body for the /api/chat route.
+//
+// Also logs the assistant turn via log_chat_turn() at whichever point the
+// stream actually settles — success, model_failed, or the zero-content
+// "unknown" case — so a failed turn still leaves a record of what was
+// asked and why it failed, not just successful replies. Logging is
+// scheduled with next/server's after() rather than plain awaited, so it
+// runs after the response has been sent without adding latency, but the
+// platform still keeps the function alive long enough for it to finish —
+// the same reason /api/leads wraps its webhook call in after().
 export async function streamChat(
   systemPrompt: string,
   userMessage: string,
   language: Language,
+  logCtx: ChatLogContext,
 ): Promise<ReadableStream<Uint8Array>> {
   let completion;
   try {
@@ -82,6 +99,14 @@ export async function streamChat(
     });
   } catch (error) {
     console.error("[ai/chat] model_failed — failed to start completion:", error);
+    after(() =>
+      logChatTurn(
+        logCtx.sessionId,
+        "assistant",
+        "[model_failed] OpenRouter request failed to start.",
+        null,
+      ),
+    );
     return errorStream(
       "model_failed",
       "OpenRouter request failed to start.",
@@ -114,6 +139,14 @@ export async function streamChat(
         console.error(
           "[ai/chat] unknown — model stream closed with zero content",
         );
+        after(() =>
+          logChatTurn(
+            logCtx.sessionId,
+            "assistant",
+            "[unknown] Model stream closed with zero content.",
+            null,
+          ),
+        );
         await writer.write(
           encoder.encode(
             sseErrorEvent(
@@ -123,11 +156,24 @@ export async function streamChat(
             ),
           ),
         );
-      } else if (detectLead(fullText)) {
-        await writer.write(encoder.encode(sseEvent({ requiresLead: true })));
+      } else {
+        after(() =>
+          logChatTurn(logCtx.sessionId, "assistant", fullText, logCtx.sources),
+        );
+        if (detectLead(fullText)) {
+          await writer.write(encoder.encode(sseEvent({ requiresLead: true })));
+        }
       }
     } catch (error) {
       console.error("[ai/chat] model_failed — stream interrupted mid-response:", error);
+      after(() =>
+        logChatTurn(
+          logCtx.sessionId,
+          "assistant",
+          "[model_failed] OpenRouter stream interrupted.",
+          null,
+        ),
+      );
       await writer.write(
         encoder.encode(
           sseErrorEvent("model_failed", "OpenRouter stream interrupted.", language),

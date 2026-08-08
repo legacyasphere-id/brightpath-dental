@@ -1,6 +1,8 @@
+import { after } from "next/server";
 import { retrieveContext, detectLanguage } from "@/lib/ai/retrieval";
 import { buildSystemPrompt } from "@/lib/ai/prompts";
 import { streamChat, errorStream } from "@/lib/ai/chat";
+import { logChatTurn } from "@/lib/supabase/logging";
 import type { ChatRequestBody } from "@/types";
 
 function sseResponse(stream: ReadableStream<Uint8Array>) {
@@ -35,6 +37,11 @@ export async function POST(request: Request) {
   // is still a reply.
   const language = detectLanguage(message);
 
+  // Logged immediately, regardless of what happens next — scheduled via
+  // after() so it doesn't add latency ahead of retrieval. See
+  // lib/supabase/logging.ts: never blocks or breaks the response.
+  after(() => logChatTurn(sessionId, "user", message, null));
+
   let chunks;
   try {
     // retrieveContext() embeds the message and calls the match_embeddings()
@@ -55,16 +62,36 @@ export async function POST(request: Request) {
       messageLength: message.length,
       error,
     });
+    // A retrieval_failed turn still leaves a record of what was asked and
+    // why it failed — this is the whole point of logging failed turns too.
+    after(() =>
+      logChatTurn(
+        sessionId,
+        "assistant",
+        "[retrieval_failed] Failed to retrieve KB context.",
+        null,
+      ),
+    );
     return sseResponse(
       errorStream("retrieval_failed", "Failed to retrieve KB context.", language),
     );
   }
 
   const systemPrompt = buildSystemPrompt(chunks, language);
+  const sources = chunks.map((c) => ({
+    chunk_id: c.chunk_id,
+    document_name: c.document_name,
+    similarity: c.similarity,
+  }));
 
   // streamChat() never throws — a failure to start the completion resolves
   // to an error-and-close stream internally, so this is always a valid SSE
-  // response body.
-  const stream = await streamChat(systemPrompt, message, language);
+  // response body. It logs the assistant turn itself, once the stream
+  // actually settles (success, model_failed, or zero-content), since only
+  // it knows the final content.
+  const stream = await streamChat(systemPrompt, message, language, {
+    sessionId,
+    sources,
+  });
   return sseResponse(stream);
 }

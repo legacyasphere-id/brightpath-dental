@@ -37,10 +37,13 @@ export interface Conversation {
 
 export type MessageRole = "user" | "assistant";
 
+// Matches what retrieveContext() actually returns and what
+// log_chat_turn() stores in messages.sources — not "excerpt", which
+// nothing ever populated.
 export interface MessageSource {
   chunk_id: string;
   document_name: string;
-  excerpt: string;
+  similarity: number;
 }
 
 export interface Message {
