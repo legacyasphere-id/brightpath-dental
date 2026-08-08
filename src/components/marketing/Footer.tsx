@@ -1,4 +1,4 @@
-import { MapPin, Phone, Clock } from "lucide-react";
+import { MapPin, Phone, MessageCircle, Clock } from "lucide-react";
 
 export function Footer() {
   return (
@@ -72,9 +72,22 @@ export function Footer() {
                 </a>
               </li>
               <li className="flex gap-2.5">
+                <MessageCircle size={16} className="mt-0.5 flex-shrink-0 text-clinic-muted" />
+                <a
+                  href="https://wa.me/6281229467180"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors hover:text-clinic-navy"
+                >
+                  +62 812-2946-7180 (WhatsApp)
+                </a>
+              </li>
+              <li className="flex gap-2.5">
                 <Clock size={16} className="mt-0.5 flex-shrink-0 text-clinic-muted" />
                 <span>
-                  Mon–Sat: 08.00–20.00
+                  Mon–Fri: 08.00–20.00
+                  <br />
+                  Sat: 08.00–17.00
                   <br />
                   Sun: 09.00–14.00
                 </span>
