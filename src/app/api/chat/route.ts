@@ -1,7 +1,17 @@
 import { retrieveContext, detectLanguage } from "@/lib/ai/retrieval";
 import { buildSystemPrompt } from "@/lib/ai/prompts";
-import { streamChat } from "@/lib/ai/chat";
+import { streamChat, errorStream } from "@/lib/ai/chat";
 import type { ChatRequestBody } from "@/types";
+
+function sseResponse(stream: ReadableStream<Uint8Array>) {
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+    },
+  });
+}
 
 export async function POST(request: Request) {
   let body: ChatRequestBody;
@@ -20,6 +30,11 @@ export async function POST(request: Request) {
     return Response.json({ error: "sessionId is required" }, { status: 400 });
   }
 
+  // Computed up front, independent of retrieval, so an error reply follows
+  // the same language rule a successful reply would have used — an error
+  // is still a reply.
+  const language = detectLanguage(message);
+
   let chunks;
   try {
     // retrieveContext() embeds the message and calls the match_embeddings()
@@ -28,32 +43,28 @@ export async function POST(request: Request) {
     // doesn't silently drift if those env vars ever change.
     chunks = await retrieveContext(message, 5);
   } catch (error) {
-    console.error("[api/chat] retrieval failed:", error);
-    return Response.json(
-      { error: "Failed to retrieve context" },
-      { status: 500 },
+    // Supabase unreachable, RPC error, DNS — never fall back to answering
+    // without retrieved context. The KB holds prices, schedules, insurance
+    // terms, and doctor credentials; a model guessing those from memory
+    // would invent them. Failing honestly beats answering confidently and
+    // wrong. Returned as an SSE stream (not a plain JSON error) so the
+    // client has exactly one response shape to parse regardless of which
+    // stage failed.
+    console.error("[api/chat] retrieval_failed:", {
+      sessionId,
+      messageLength: message.length,
+      error,
+    });
+    return sseResponse(
+      errorStream("retrieval_failed", "Failed to retrieve KB context.", language),
     );
   }
 
-  const language = detectLanguage(message);
   const systemPrompt = buildSystemPrompt(chunks, language);
 
-  let stream: ReadableStream<Uint8Array>;
-  try {
-    stream = await streamChat(systemPrompt, message);
-  } catch (error) {
-    console.error("[api/chat] streamChat failed:", error);
-    return Response.json(
-      { error: "Failed to start chat stream" },
-      { status: 500 },
-    );
-  }
-
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-    },
-  });
+  // streamChat() never throws — a failure to start the completion resolves
+  // to an error-and-close stream internally, so this is always a valid SSE
+  // response body.
+  const stream = await streamChat(systemPrompt, message, language);
+  return sseResponse(stream);
 }
