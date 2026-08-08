@@ -17,7 +17,7 @@ const reasons: { icon: LucideIcon; title: string; description: string }[] = [
     icon: BadgeCheck,
     title: "Specialist Team",
     description:
-      "Every doctor holds an accredited Indonesian dental specialist degree with active clinical experience.",
+      "Two board-certified specialists plus a pediatric-trained general dentist, all with active clinical experience.",
   },
   {
     icon: MapPin,

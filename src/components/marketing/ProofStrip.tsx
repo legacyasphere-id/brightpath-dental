@@ -3,7 +3,7 @@ import { Star, ShieldCheck, BadgeCheck, Users, type LucideIcon } from "lucide-re
 const items: { icon: LucideIcon; label: string }[] = [
   { icon: Star, label: "5.0 patient rating" },
   { icon: ShieldCheck, label: "BPJS & private insurance accepted" },
-  { icon: BadgeCheck, label: "Accredited specialist team" },
+  { icon: BadgeCheck, label: "Board-certified specialists on staff" },
   { icon: Users, label: "5,000+ patients served" },
 ];
 

@@ -52,7 +52,15 @@ export function LeadForm() {
         }),
       });
       setStatus(res.ok ? "success" : "error");
-      if (res.ok) setForm({ name: "", phone: "", service: "", message: "" });
+      if (res.ok) {
+        const waMessage = `Halo BrightPath Dental, saya ${form.name} baru saja booking appointment${form.service ? ` untuk ${form.service}` : ""}. Mohon konfirmasi jadwalnya ya.`;
+        window.open(
+          `https://wa.me/6281229467180?text=${encodeURIComponent(waMessage)}`,
+          "_blank",
+          "noopener,noreferrer",
+        );
+        setForm({ name: "", phone: "", service: "", message: "" });
+      }
     } catch {
       setStatus("error");
     }

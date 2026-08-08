@@ -32,17 +32,21 @@ Branch: `fix/chat-language-detection` · pushed, no PR.
 Branch: `feat/doctor-portraits` · pushed, no PR.
 
 **Copy cleanup.** Completed in an earlier session.
-Branch: `chore/copy-cleanup-pass` · pushed, no PR. **Still not merged — the three identical `5.0` ratings are live on production right now.**
+Branch: `chore/copy-cleanup-pass` · **merged** (PR #12).
 
-### Open branches needing PRs / merge
+**RUN 0 — merge sweep.** `chore/copy-cleanup-pass` (#12), `fix/chat-language-detection` (#13), and `feat/doctor-portraits` (#14) all merged cleanly into `main`, in that order, after a conflict-free dry run in a scratch worktree. `docs/handoff` (#11, this file) merged too. The language fix is still unverified live — see above.
 
-| branch | state |
-|---|---|
-| `chore/copy-cleanup-pass` | pushed, unmerged |
-| `fix/chat-language-detection` | pushed, unmerged, unverified |
-| `feat/doctor-portraits` | pushed, unmerged |
+**RUN A — contradicted facts (page vs. KB).** Cross-checked every number on the page against the live Supabase KB. Fixed: the "every doctor is a specialist" claim (WhyUs + ProofStrip — drg. Citra Dewi has no `Sp.` title), Hero's "15+ Dental Services" stat (corrected to 6, matching what's actually listed), and doctor bios understated experience (Anisa 10+ → 12+ yrs, added years for Budi/Citra to match the KB). Pricing was investigated and left unchanged — the "Basic Check-up" Rp150.000 bundle price actually matches 2 of 3 KB documents; the brief's suspected mismatch was a bad comparison (bundle price vs. exam-only price, not the same service).
+Branch: `fix/contradicted-facts` · pushed, no PR.
 
-Merge these before starting new runs, or the branches will drift.
+**RUN A2 — knowledge base sync.** The remaining contradictions were inside the KB itself, not the page:
+- Stale WhatsApp/phone numbers (`+62 812-8888-8888` / `+62 21-8888-8888`) in `04-clinic-info.txt` and `05-faq.txt`, left over from before the copy-cleanup phone number change. Realigned to the real numbers and — since the clinic previously had no WhatsApp number published anywhere on the site despite multiple WhatsApp-dependent CTAs — added a real one (`+62 812-2946-7180`) rather than collapsing to a single number. Wired into `Footer.tsx` and into `LeadForm.tsx`'s post-submit flow (opens a prefilled `wa.me` link after the lead is saved to Supabase — the submit button already posts to `/api/leads` and fires the Make.com webhook, so that pipeline was preserved rather than replaced).
+- `02-pricing.txt`'s scaling price contradicted `05-faq.txt`/`01-services.txt` (itemized 100k+150k=250k vs. bundle total 150k). Reworded `02-pricing.txt` to state the bundle total explicitly.
+- Footer hours: `Mon–Sat: 08.00–20.00` incorrectly folded Saturday into the weekday range. KB says Saturday closes at 17.00. Footer corrected to three lines (Mon–Fri / Sat / Sun), KB treated as source of truth per direction.
+- All edits applied directly to `document_chunks.content` via SQL (not through the upload pipeline), verified with a fresh query, and cross-checked via `match_embeddings()` using each chunk's own stored vector (similarity 1.0) to confirm retrieval serves the new text. See the follow-up note below on why this is safe.
+Branch: `fix/contradicted-facts` · pushed, no PR.
+
+**Follow-up: stale embedding vectors.** `match_embeddings()` joins `document_chunks` live and returns `dc.content` at query time — the embedding vector is only used for similarity ranking, not as a cached copy of the text. So editing chunk content directly (as in RUN A2) takes effect immediately for what the bot quotes, without re-embedding. The vectors for the three edited chunks are now stale relative to the text (computed from the old wording), which is harmless for a phone number, an hours tweak, or a pricing clarification — it would only start to matter if a chunk's topic changed substantially enough to shift which queries retrieve it. Re-embedding through the real pipeline (`/api/knowledge` → `embed()`) requires OpenRouter, which this sandbox can't reach — do a proper re-embed of `04-clinic-info.txt`, `05-faq.txt`, and `02-pricing.txt` next time this runs somewhere with live OpenRouter access.
 
 ### Database — verified live
 
