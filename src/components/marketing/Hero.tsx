@@ -54,7 +54,7 @@ export function Hero() {
               {[
                 { value: "5,000+", label: "Patients Served" },
                 { value: "10+", label: "Years Experience" },
-                { value: "15+", label: "Dental Services" },
+                { value: "6", label: "Dental Services" },
                 { value: "98%", label: "Satisfaction Rate" },
               ].map((stat) => (
                 <div key={stat.label}>
