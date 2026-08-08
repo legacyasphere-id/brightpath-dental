@@ -4,7 +4,8 @@ import type { RetrievedChunk } from '@/types';
 
 // buildSystemPrompt(chunks, language) takes positional args, not an options
 // object — chunks is required (an array, [] for "no context") and language
-// defaults to "en".
+// defaults to "id", since nearly every visitor is Indonesian and
+// detectLanguage() itself now defaults to "id" for the same reason.
 describe('buildSystemPrompt', () => {
   it('returns a non-empty string', () => {
     const prompt = buildSystemPrompt([]);
@@ -17,9 +18,9 @@ describe('buildSystemPrompt', () => {
     expect(prompt).toContain('Bahasa Indonesia');
   });
 
-  it('instructs English responses by default', () => {
+  it('instructs Indonesian responses by default', () => {
     const prompt = buildSystemPrompt([]);
-    expect(prompt).toContain('Respond in English');
+    expect(prompt).toContain('Balas dalam Bahasa Indonesia');
   });
 
   it('includes retrieved chunk content in the prompt', () => {

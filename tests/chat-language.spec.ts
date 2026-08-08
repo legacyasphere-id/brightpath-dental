@@ -32,6 +32,12 @@ test.describe('Chat language detection', () => {
     expect(text).not.toContain('wie kann ich');
     expect(text).not.toContain('möchten sie');
     expect(text).not.toContain('ihnen');
+
+    // The reply must actually be Indonesian, not merely "not German" —
+    // an English reply would satisfy the assertions above too.
+    expect(text).toMatch(
+      /\b(saya|kami|anda|silakan|maaf|dapat|klinik|dokter|layanan|informasi)\b/
+    );
   });
 
   test('a clearly English question gets an English reply', async ({
