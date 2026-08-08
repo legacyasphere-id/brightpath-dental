@@ -2,7 +2,7 @@ import type { RetrievedChunk } from "@/types";
 
 export function buildSystemPrompt(
   chunks: RetrievedChunk[],
-  language: "id" | "en" = "en",
+  language: "id" | "en" = "id",
 ): string {
   const context = chunks
     .map((c, i) => `[Source ${i + 1}: ${c.document_name}]\n${c.content}`)
