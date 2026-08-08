@@ -1,4 +1,4 @@
-import { createServiceClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/server";
 import { embed } from "@/lib/ai/embeddings";
 import type { RetrievedChunk } from "@/types";
 
@@ -16,7 +16,7 @@ export async function retrieveContext(
   k: number = DEFAULT_TOP_K,
 ): Promise<RetrievedChunk[]> {
   const queryEmbedding = await embed(query);
-  const supabase = createServiceClient();
+  const supabase = createAnonClient();
 
   const { data, error } = await supabase.rpc("match_embeddings", {
     query_embedding: queryEmbedding,
