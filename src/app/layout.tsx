@@ -16,9 +16,25 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://brightpath-dental.vercel.app"),
   title: "BrightPath Dental — Modern Dental Care in Bekasi",
+  // Distinct from openGraph.description on purpose: this one is written for
+  // a search result, the other for a one-line pitch read in a chat list.
   description:
     "BrightPath Dental — book appointments, chat with our AI assistant, and get transparent pricing for dental care in Bekasi.",
+  openGraph: {
+    title: "BrightPath Dental",
+    description: "Perawatan gigi modern di Bekasi — booking mudah lewat WhatsApp.",
+    url: "/",
+    siteName: "BrightPath Dental",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BrightPath Dental",
+    description: "Perawatan gigi modern di Bekasi — booking mudah lewat WhatsApp.",
+  },
 };
 
 export default function RootLayout({
