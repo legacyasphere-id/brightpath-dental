@@ -5,6 +5,9 @@ import {
   Smile,
   ShieldCheck,
   Baby,
+  Scissors,
+  Crown,
+  Replace,
   type LucideIcon,
 } from "lucide-react";
 
@@ -44,6 +47,24 @@ const services: { icon: LucideIcon; title: string; description: string }[] = [
     title: "Pediatric Dentistry",
     description:
       "Gentle, child-friendly care in a welcoming environment designed for little patients.",
+  },
+  {
+    icon: Scissors,
+    title: "Tooth Extraction",
+    description:
+      "Simple and surgical extractions, including impacted wisdom teeth, with anaesthesia and clear aftercare guidance.",
+  },
+  {
+    icon: Crown,
+    title: "Crowns and Bridges",
+    description:
+      "Porcelain and zirconia restorations, with same-day crowns available using CAD/CAM technology.",
+  },
+  {
+    icon: Replace,
+    title: "Dentures",
+    description:
+      "Full and partial removable dentures in acrylic or flexible valplast, fitted over three to four visits.",
   },
 ];
 

@@ -10,6 +10,9 @@ const services = [
   "Orthodontics & Braces",
   "Root Canal Treatment",
   "Pediatric Dentistry",
+  "Tooth Extraction",
+  "Crowns and Bridges",
+  "Dentures",
   "Other / Not Sure Yet",
 ];
 

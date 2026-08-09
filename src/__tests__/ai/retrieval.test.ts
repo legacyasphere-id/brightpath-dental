@@ -1,5 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { detectLanguage } from '@/lib/ai/language';
+import { expandQueryForRetrieval } from '@/lib/ai/retrieval';
+
+const { mockEmbed, mockRpc } = vi.hoisted(() => ({
+  mockEmbed: vi.fn(),
+  mockRpc: vi.fn(),
+}));
+
+vi.mock('@/lib/ai/embeddings', () => ({ embed: mockEmbed }));
+vi.mock('@/lib/supabase/server', () => ({
+  createAnonClient: vi.fn(() => ({ rpc: mockRpc })),
+}));
 
 describe('detectLanguage', () => {
   it('detects Bahasa Indonesia from common words', () => {
@@ -32,5 +43,47 @@ describe('detectLanguage', () => {
     // real Indonesian evidence must still win.
     const result = detectLanguage('harga scaling berapa ya dok?');
     expect(result).toBe('id');
+  });
+});
+
+describe('expandQueryForRetrieval', () => {
+  it('embeds the original question verbatim inside the expansion', () => {
+    const result = expandQueryForRetrieval('ada layanan apa saja?');
+    expect(result).toContain('ada layanan apa saja?');
+  });
+
+  it('adds clinic context and cross-topic vocabulary, not just length', () => {
+    const result = expandQueryForRetrieval('ada layanan apa saja?');
+    expect(result).toContain('BrightPath Dental');
+    expect(result).toContain('layanan');
+    expect(result).toContain('dokter');
+    expect(result).toContain('harga');
+  });
+
+  it('is a fixed template — no per-question branching', () => {
+    // Two unrelated questions should share the exact same surrounding
+    // template text, only the quoted question itself should differ.
+    const a = expandQueryForRetrieval('berapa biaya scaling?');
+    const b = expandQueryForRetrieval('jam buka klinik?');
+    const aWithoutQuestion = a.replace('berapa biaya scaling?', '');
+    const bWithoutQuestion = b.replace('jam buka klinik?', '');
+    expect(aWithoutQuestion).toBe(bWithoutQuestion);
+  });
+});
+
+describe('retrieveContext', () => {
+  beforeEach(() => {
+    mockEmbed.mockReset().mockResolvedValue([0.1, 0.2, 0.3]);
+    mockRpc.mockReset().mockResolvedValue({ data: [], error: null });
+  });
+
+  it('embeds the expanded query, not the raw one', async () => {
+    const { retrieveContext } = await import('@/lib/ai/retrieval');
+    await retrieveContext('ada layanan apa saja?', 5);
+
+    expect(mockEmbed).toHaveBeenCalledTimes(1);
+    const embeddedText = mockEmbed.mock.calls[0][0];
+    expect(embeddedText).not.toBe('ada layanan apa saja?');
+    expect(embeddedText).toBe(expandQueryForRetrieval('ada layanan apa saja?'));
   });
 });

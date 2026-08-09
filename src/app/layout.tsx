@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     "BrightPath Dental — book appointments, chat with our AI assistant, and get transparent pricing for dental care in Bekasi.",
   openGraph: {
     title: "BrightPath Dental",
-    description: "Perawatan gigi modern di Bekasi — booking mudah lewat WhatsApp.",
+    description: "Perawatan gigi modern di Bekasi dengan booking mudah lewat WhatsApp.",
     url: "/",
     siteName: "BrightPath Dental",
     locale: "id_ID",
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "BrightPath Dental",
-    description: "Perawatan gigi modern di Bekasi — booking mudah lewat WhatsApp.",
+    description: "Perawatan gigi modern di Bekasi dengan booking mudah lewat WhatsApp.",
   },
 };
 
