@@ -2,7 +2,7 @@
 
 Single source of truth for the current polish pass. Drop at repo root. Work one run per session, in the order given. Do not batch runs.
 
-Last updated: Aug 8, 2026
+Last updated: Aug 9, 2026
 
 ---
 
@@ -76,7 +76,7 @@ Branch: `fix/chat-rag-least-privilege` · **merged** (PR #19).
 **RUN F — vague services answer, corrected diagnosis: generation, not retrieval.** Asked "ada layanan apa saja?", the bot listed 5 of the 9 services in `01-services.txt` (omitting, notably, dental implants — the highest-value service, starting at Rp 8.000.000 — and pediatric dentistry, drg. Citra Dewi's entire specialty). Investigated before touching anything: `messages.sources` is empty (conversation logging is still RUN D, not built), and both the live site and Supabase's REST endpoint are network-blocked from this sandbox, so the exact historical retrieval couldn't be read directly. The circumstantial case against retrieval is strong though — the whole KB is only 6 chunks total, `top_k=5`, so excluding a single-chunk document that's a near-paraphrase of the query would require an unusually low similarity score for a 6-chunk pool. The prompt was the more direct explanation: `prompts.ts`'s RULES block said "Keep answers under 3 sentences unless detail is needed" with no exception carved out for enumeration questions, leaving "detail needed" to the model's judgment. Added an explicit rule: enumeration questions ("what services/doctors/options exist") must list everything present in the retrieved context and are exempt from the 3-sentence guideline. Not verified live yet — needs a real question asked in production, since retrieval still fails from this sandbox (OpenRouter blocked).
 Branch: `fix/services-enumeration-and-markdown` · **merged** (PR #20).
 
-⚠️ **Update, RUN D live data — this diagnosis needs revisiting, not acted on yet.** Once conversation logging shipped, a real production question showed `01-services.txt` was **not** among the retrieved chunks at all: the retrieved set was `02-pricing.txt` (0.610), `05-faq.txt` (0.575), `05-faq.txt` (0.515), `03-doctors.txt` (0.513) — four chunks, not five, and the services document wasn't one of them. The answer looked complete only because `02-pricing.txt` happens to enumerate services as a side effect of being a categorized price list. This contradicts the corpus-size argument made above. Caveat: that message bundled three questions in one, which blends the embedding, so it isn't a clean test — a second, single-question ask ("ada layanan apa saja" on its own) is pending before deciding anything. Do not act on this until that result is in.
+⚠️ **Update, RUN D live data — this diagnosis needs revisiting, not acted on yet.** Once conversation logging shipped, a real production question showed `01-services.txt` was **not** among the retrieved chunks at all: the retrieved set was `02-pricing.txt` (0.610), `05-faq.txt` (0.575), `05-faq.txt` (0.515), `03-doctors.txt` (0.513) — four chunks, not five, and the services document wasn't one of them. The answer looked complete only because `02-pricing.txt` happens to enumerate services as a side effect of being a categorized price list. This contradicts the corpus-size argument made above. Caveat: that message bundled three questions in one, which blends the embedding, so it isn't a clean test — a second, single-question ask ("ada layanan apa saja" on its own) is pending before deciding anything. **That result is in — see RUN G immediately below.**
 
 **RUN G — the clean single-question retest, and the real bug underneath RUN F.** Asked production exactly "ada layanan apa saja?" on its own and read the row back. `sources` came back as an empty array — zero of six chunks cleared the threshold, not four. The model answered anyway: a confident nine-item list that invented "Perawatan periodontal" (not in any KB document), while omitting dental implants (the highest-value service), pediatric dentistry (drg. Citra Dewi's specialty), and crown/bridge. Two distinct bugs, addressed separately.
 
@@ -110,7 +110,9 @@ Proceeding with the rewrite regardless, on a different justification than the re
 
 ⚠️ **Known gap found while preparing this: the admin knowledge dashboard (`/admin/knowledge`, `KnowledgeUpload.tsx`, `/api/knowledge/route.ts`) has no delete function** — upload and list only. "Delete and re-upload" for this fix had to happen as a direct SQL delete (done, see below) followed by a dashboard upload for the re-embed. Worth a real delete endpoint before this happens again.
 
-⚠️ **Pending live verification.** Once Yoga uploads the rewritten `01-services.txt` through `/admin/knowledge`: confirm via `document_chunks`/`embeddings` that the new content and a fresh embedding actually landed (query below), then re-ask "ada layanan apa saja?" and confirm `sources` includes `01-services.txt`, naming dental implants and pediatric dentistry, not naming "Perawatan periodontal." Then one negative test — a question the KB genuinely doesn't cover — to confirm the zero-chunk guard fires correctly once retrieval is healthy, not just on the retrieval path it was first observed on (broken, zero chunks for an unrelated reason). The guard has unit tests plus exactly one production observation, and that observation came from a retrieval path that was itself broken; refusing correctly with healthy retrieval is a different behavior and hasn't been tested yet.
+**Verified — the rewrite landed and re-embedded correctly.** Content, `embedded_at` timestamp, and embedding fingerprint all confirmed changed before judging retrieval by the result (see RUN G, bug one — query-side fix, below, for what retrieval actually did with it).
+
+⚠️ **Still genuinely pending: the negative test.** One question the KB doesn't cover, to confirm the zero-chunk guard fires correctly once retrieval is healthy, not just on the retrieval path it was first observed on (broken, zero chunks for an unrelated reason). The guard has unit tests plus exactly one production observation, and that observation came from a retrieval path that was itself broken; refusing correctly with healthy retrieval is a different behavior and hasn't been tested yet.
 
 **Known debt: stale embedding vectors, now with a concrete case showing why it matters.** RUN A2 edited `04-clinic-info.txt`, `05-faq.txt`, and `02-pricing.txt` directly via SQL for small factual corrections (phone number, hours, a price clarification) and left their embedding vectors unre-embedded, on the reasoning that the changes were too minor to shift retrieval. That reasoning likely still holds for those three, but this run is the concrete counter-example for why the pattern is dangerous in general: a SQL content patch here — instead of the delete-and-reupload actually used — would have left `01-services.txt`'s embedding vector computed from the old English text while the row's `content` said Indonesian. Retrieval would have kept behaving exactly as before, the rewrite would have looked like it failed, and that false negative would have sent the next investigation looking for a different cause entirely — a silently wrong conclusion, not just missing data. `04-clinic-info.txt`, `05-faq.txt`, and `02-pricing.txt` still need a real re-embed next time this runs somewhere with live OpenRouter access.
 
@@ -181,8 +183,6 @@ Two related, lower-priority Lighthouse findings, same pre-existing status, recor
 
 **Empty-state chips reordered shortest-first**, cosmetic — they were wrapping 2/1/1 in the flex row; now 2/2.
 
-**Known mismatch, flagged not fixed.** The page's Services section shows 6 service cards; `01-services.txt` describes 9. The bot (once the enumeration fix above is confirmed live) and the page now describe a different-sized clinic. Not touched in this run — deliberately out of scope, needs a decision on whether to add the 3 missing service cards to the page or trim the KB down to match what's actually offered.
-
 **RUN D — conversation logging, via a third SECURITY DEFINER function, not the anon table grants originally on these tables.** Before writing anything, checked what `conversations`/`messages` actually had — RLS enabled, but `Public select` (`qual: true`) on both, plus full anon table grants underneath. Proved this was a live, confirmed bug rather than a plausible-sounding worry: inserted a row as anon, read it straight back as anon in a separate query, saw the whole table — every visitor's full chat content (not just `sources` — the `content` column, potentially names/phone numbers/symptoms someone typed) was readable by anyone holding the anon key, which is public. `grep` across the codebase confirmed nothing reads these tables today (no admin conversations page exists yet), so the exposure was powering zero features. This is the third permissive default found in this schema in one day, after the chat route's service-role key and `document_chunks`/`documents`/`embeddings`'s broad anon grants — assume any table not explicitly checked is more open than intended.
 
 Fix, migration `004_log_chat_turn_security_definer.sql`, same pattern as `match_embeddings()`:
@@ -199,7 +199,15 @@ Branch: `feat/conversation-logging` · **merged** (PR #21). Verified live in pro
 `vercel.json` added: a daily cron (`0 0 * * *`, once at 00:00 UTC) hitting `/api/health`, within Vercel Hobby's one-invocation-per-day limit. Purpose: the Supabase free tier pauses after 7 idle days, which is exactly what caused the outage — DNS withdrawn, vector search threw `ENOTFOUND`, `/api/chat` returned 500. A daily ping is comfortably inside the 7-day window.
 
 Verified: `src/__tests__/api/health.test.ts` (Vitest, mocked Supabase client — a live check can't reliably exercise both status branches on demand either way) covers 200/healthy, 503/Supabase-error, and 503/client-throws. Also hit the real route on a real running server in this sandbox (not mocked): got a genuine 503 with `ok: false` against the actual network-blocked condition, confirming the failure path works end to end, not just against a mock.
-Branch: `feat/health-check-keepalive` · pushed.
+Branch: `feat/health-check-keepalive` · **merged** (PR #22).
+
+### Two things worth taking away from today, stated plainly rather than left to reconstruct
+
+**Three diagnoses today were confidently wrong, and all three were corrected by measuring something rather than reasoning about the same evidence harder.** Worth naming together, because the pattern repeated three separate times: **(1)** RUN A's brief suspected a pricing contradiction between the page and the KB; checking the actual documents showed the "Basic Check-up" price matched 2 of 3 KB sources — the suspected mismatch was comparing a bundle price against an exam-only price, not the same service at all. **(2)** RUN F diagnosed vague service answers as a generation problem — a brevity rule with no enumeration exception — based on circumstantial reasoning about corpus size, since there was no way yet to see what retrieval had actually returned. It read as reasonable and was still wrong: `01-services.txt` wasn't being retrieved at all, which the diagnosis never considered because it couldn't be checked. **(3)** The theory that `01-services.txt` failed to retrieve because it was the KB's only English-language document was plausible and fit the evidence available — and was still wrong. A real rewrite into Indonesian produced a zero measurable change in retrieval; the mechanism turned out to be short-query embedding diffuseness, confirmed only once a production paraphrase test could show every chunk's similarity moving together, not just the target document's.
+
+None of these were careless guesses at the time — each fit what was known when it was made. What changed the outcome each time was testing it against real data before shipping the fix, not accepting the more confident-sounding explanation. That's the working method the rest of this document reflects, and the reason it's applied consistently: the alternative produced a wrong answer three times in one day.
+
+**The worst bug of the day was only findable because of a decision made hours earlier, for an unrelated reason.** RUN F's diagnosis above was built on circumstantial reasoning specifically because `messages.sources` didn't exist yet — there was no way to inspect what retrieval actually returned. RUN D shipped conversation logging afterward (chronologically between RUN F and RUN G below, even though it's written up after RUN G in this document — the write-up order followed when each thing got documented, not when it happened). It was that column, read back from a real production question, that surfaced RUN G's bug two: a medical chatbot inventing a service the clinic doesn't offer while omitting its highest-value one, on a code path that wasn't broken in any way a stack trace would show. That bug was undiagnosable before logging existed, not merely harder to diagnose — the method that found it depended on data that the method used one run earlier didn't have. That's the argument for building observability before a specific incident demands it, not after: RUN F needed exactly what RUN D built, and didn't have it yet.
 
 ### Database — verified live
 
@@ -241,13 +249,25 @@ Doctors, for alt text and copy:
 - **drg. Budi Santoso, Sp.Ort** — ortodonti · 9 yrs · Universitas Airlangga · Sel, Kam, Sab
 - **drg. Citra Dewi** — kedokteran gigi anak dan umum · 7 yrs · Universitas Trisakti · Sen–Jum, Min
 
-### Known open bugs
+### Bugs open at the start of this pass — kept as a record of the starting state, not current status
 
-1. **Empty chat bubble** — retrieval throws, SSE closes with zero tokens, client renders a blank grey box forever. Run 2a.
-2. **Chat panel overflows viewport** — panel taller than the window, header clipped off-screen. Run 7.
-3. **Blank panel on open** — no empty state. Run 7.
-4. **Vague retrieval** — `"disini ada service apa ya?"` returns *"dan perawatan gigi lainnya"* despite `01-services.txt` being indexed and healthy. Run 5.
-5. **Supabase re-pause risk** — will pause again after 7 idle days. Run 3.
+Every item below is resolved; each says where. This section previously listed them as open long after they weren't — fixed here so it can't be mistaken for a live status again.
+
+1. **Empty chat bubble** — retrieval throws, SSE closes with zero tokens, client renders a blank grey box forever. **Fixed, RUN B.**
+2. **Chat panel overflows viewport** — panel taller than the window, header clipped off-screen. **Fixed, RUN C.**
+3. **Blank panel on open** — no empty state. **Fixed, RUN C.**
+4. **Vague retrieval** — `"disini ada service apa ya?"` returns *"dan perawatan gigi lainnya"* despite `01-services.txt` being indexed and healthy. The deepest of the five: turned out to be RUN F's wrong generation-not-retrieval diagnosis first, then RUN G's actual zero-chunk and embedding-diffuseness bugs. **Fixed, RUN G and the query-expansion follow-up** (see "Two things worth taking away from today" above for why the first diagnosis missed it).
+5. **Supabase re-pause risk** — will pause again after 7 idle days. **Mitigated, the health-check keep-alive cron.**
+
+### Known debt, consolidated
+
+Scattered across separate entries above — gathered here once rather than left to reconstruct:
+
+1. **Stale embedding vectors.** `04-clinic-info.txt`, `05-faq.txt`, `02-pricing.txt` (RUN A2) — content edited directly via SQL, embeddings never recomputed. Low-risk for the specific edits made (a phone number, hours, a price clarification), but genuine debt; needs a real re-embed once this runs somewhere with live OpenRouter access. `01-services.txt` carried the same risk and was deliberately *not* patched this way, for exactly this reason — see RUN G's note on why a SQL patch there would have produced a silently wrong conclusion instead of just missing data.
+2. **`anon`'s broad table grants** on `document_chunks`, `documents`, `embeddings` — RLS is currently the only thing stopping direct anon reads/writes. `match_embeddings()` is now the sanctioned read path, so the underlying grants aren't needed anymore and could be revoked with no loss of functionality. Not done.
+3. **Orphan chunk.** `01-services.txt`'s second chunk (60 tokens, crown/bridge/denture pricing, starts mid-sentence at "menggunakan teknologi CAD/CAM") never makes the `top_k=5` cut — it consistently loses to its own sibling chunk. Should be merged into its neighbor if the KB grows.
+4. **Three accessibility defects**, confirmed pre-existing via Lighthouse, none introduced this session: `LeadForm.tsx`'s service `<select>` has a visible label that isn't wired to it via `htmlFor`/`id` — a real defect on the one form that captures patients, not just a score deduction; widespread `color-contrast` failures (26 instances) across muted-text utility classes; one `<h4>` heading-order skip in `Footer.tsx`.
+5. **Admin knowledge dashboard has no delete function** — upload and list only. The `01-services.txt` rewrite had to route around this with a direct SQL delete instead.
 
 ---
 
