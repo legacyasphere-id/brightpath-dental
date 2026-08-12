@@ -10,6 +10,7 @@ import {
   Replace,
   type LucideIcon,
 } from "lucide-react";
+import { SECTION_PADDING } from "@/lib/utils";
 
 const services: { icon: LucideIcon; title: string; description: string }[] = [
   {
@@ -70,7 +71,7 @@ const services: { icon: LucideIcon; title: string; description: string }[] = [
 
 export function Services() {
   return (
-    <section id="services" className="bg-clinic-surface px-6 py-24 md:py-32">
+    <section id="services" className={`bg-clinic-surface ${SECTION_PADDING}`}>
       <div className="mx-auto max-w-6xl">
         <div className="mb-12">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">

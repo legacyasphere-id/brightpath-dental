@@ -1,3 +1,5 @@
+import { SECTION_PADDING } from "@/lib/utils";
+
 const plans = [
   {
     name: "Basic Check-up",
@@ -42,7 +44,7 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section id="pricing" className="bg-clinic-surface px-6 py-24 md:py-32">
+    <section id="pricing" className={`bg-clinic-surface ${SECTION_PADDING}`}>
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">

@@ -1,14 +1,15 @@
-import { MessageCircle } from "lucide-react";
+import Image from "next/image";
+import { MessageCircle, Sparkle, Star } from "lucide-react";
+
+// Set once a cut-out subject photo exists (e.g. "/images/hero/patient.webp").
+// Until then the mint shape behind the feature card renders on its own as
+// an intentional soft background form, not an empty placeholder — nothing
+// else about the layout needs to change when the asset arrives.
+const heroSubjectImageSrc: string | undefined = undefined;
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden bg-clinic-bg">
-      {/* Decorative background circles */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-clinic-mint opacity-5" />
-        <div className="absolute right-32 bottom-0 h-64 w-64 translate-y-1/3 rounded-full bg-clinic-navy opacity-5" />
-      </div>
-
       <div className="mx-auto max-w-6xl px-6 py-24 md:py-40">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Left — copy */}
@@ -49,27 +50,62 @@ export function Hero() {
               </a>
             </div>
 
-            {/* Stats row */}
-            <div className="mt-12 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
-              {[
-                { value: "5,000+", label: "Patients Served" },
-                { value: "10+", label: "Years Experience" },
-                { value: "9", label: "Dental Services" },
-                { value: "98%", label: "Satisfaction Rate" },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <p className="font-sans text-2xl font-extrabold text-clinic-navy">
-                    {stat.value}
-                  </p>
-                  <p className="mt-0.5 text-xs text-clinic-muted">{stat.label}</p>
-                </div>
-              ))}
-            </div>
+            {/* Pricing transparency called out this early on purpose — a
+                multi-branch competitor that routes every price question to
+                WhatsApp cannot copy this. Honest, not a claim of being
+                cheapest. */}
+            <a
+              href="#pricing"
+              className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-clinic-body transition-colors hover:text-clinic-navy"
+            >
+              Transparent pricing, real rupiah figures, no calling required
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+                <path
+                  fillRule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </a>
           </div>
 
-          {/* Right — visual card (DanPhe-inspired: dark panel with feature checklist) */}
-          <div className="hidden lg:block">
-            <div className="rounded-2xl bg-clinic-navy p-8 text-white shadow-xl">
+          {/* Right — feature card overlapping a mint shape reserved for a
+              future patient photo. The shape is the layout's image slot:
+              set heroSubjectImageSrc above once a cut-out photo exists. */}
+          <div className="relative hidden lg:block">
+            <div
+              aria-hidden="true"
+              className="absolute -right-4 -top-10 h-96 w-96 overflow-hidden rounded-full bg-clinic-mintLight"
+            >
+              {heroSubjectImageSrc && (
+                <Image
+                  src={heroSubjectImageSrc}
+                  alt=""
+                  fill
+                  sizes="384px"
+                  className="object-cover"
+                />
+              )}
+            </div>
+
+            {/* Sparse accent marks — brightness, not dental iconography. */}
+            <Sparkle
+              aria-hidden="true"
+              className="absolute -left-3 top-10 h-5 w-5 text-clinic-mint"
+              strokeWidth={1.5}
+            />
+            <Star
+              aria-hidden="true"
+              className="absolute right-16 -top-6 h-4 w-4 text-clinic-navy/40"
+              strokeWidth={1.5}
+            />
+            <Sparkle
+              aria-hidden="true"
+              className="absolute -left-6 bottom-24 h-4 w-4 text-clinic-mint/60"
+              strokeWidth={1.5}
+            />
+
+            <div className="relative z-10 ml-6 mt-20 rounded-2xl bg-clinic-navy p-8 text-white shadow-xl">
               <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-mint">
                 Why patients choose us
               </p>

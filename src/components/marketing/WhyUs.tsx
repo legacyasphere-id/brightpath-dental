@@ -1,4 +1,5 @@
 import { Bot, Microscope, BadgeCheck, MapPin, type LucideIcon } from "lucide-react";
+import { SECTION_PADDING } from "@/lib/utils";
 
 const reasons: { icon: LucideIcon; title: string; description: string }[] = [
   {
@@ -29,7 +30,7 @@ const reasons: { icon: LucideIcon; title: string; description: string }[] = [
 
 export function WhyUs() {
   return (
-    <section className="bg-clinic-navy px-6 py-24 text-white md:py-32">
+    <section className={`bg-clinic-navy text-white ${SECTION_PADDING}`}>
       <div className="mx-auto max-w-6xl">
         <div className="mb-12">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-mint">
