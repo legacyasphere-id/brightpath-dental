@@ -1,18 +1,28 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChatMessage, type ChatMessageData } from "./ChatMessage";
 import { ChatEmptyState } from "./ChatEmptyState";
 import { LeadCapture } from "./LeadCapture";
 import { detectLanguage, type Language } from "@/lib/ai/language";
 
-export function ChatPanel({ onClose }: { onClose: () => void }) {
+export function ChatPanel({
+  onClose,
+  initialMessage,
+}: {
+  onClose: () => void;
+  // Set when a marketing CTA (e.g. AIDemo's chips) opened the panel with a
+  // question already chosen — sent once via the same sendMessage() the
+  // empty state's own chips use, so this is one send path, not two.
+  initialMessage?: string | null;
+}) {
   const [sessionId] = useState(() => crypto.randomUUID());
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [requiresLead, setRequiresLead] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const sentInitialMessage = useRef(false);
 
   function scrollToBottom() {
     requestAnimationFrame(() => {
@@ -139,6 +149,17 @@ export function ChatPanel({ onClose }: { onClose: () => void }) {
       setLoading(false);
     }
   }
+
+  // ChatPanel remounts fresh each time the widget opens (see ChatWidget.tsx,
+  // which conditionally renders it), so this ref-guarded effect fires
+  // exactly once per open — never re-sends on a later re-render.
+  useEffect(() => {
+    if (initialMessage && !sentInitialMessage.current) {
+      sentInitialMessage.current = true;
+      sendMessage(initialMessage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMessage]);
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();

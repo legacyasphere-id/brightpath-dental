@@ -1,3 +1,5 @@
+import { SECTION_PADDING } from "@/lib/utils";
+
 const testimonials = [
   {
     quote:
@@ -24,7 +26,7 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="bg-clinic-bg px-6 py-24 md:py-32">
+    <section className={`bg-clinic-bg ${SECTION_PADDING}`}>
       <div className="mx-auto max-w-6xl">
         <div className="mb-12">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">

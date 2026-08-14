@@ -45,8 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${jakarta.variable} ${inter.variable} antialiased`}>
-        {children}
-        <ChatWidget />
+        <ChatWidget>{children}</ChatWidget>
       </body>
     </html>
   );

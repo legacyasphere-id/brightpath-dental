@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle2 } from "lucide-react";
+import { SECTION_PADDING } from "@/lib/utils";
 
 const services = [
   "General Check-up & Cleaning",
@@ -73,7 +74,7 @@ export function LeadForm() {
     "w-full rounded-lg border border-clinic-border px-4 py-2.5 text-sm text-clinic-text placeholder:text-clinic-muted focus:border-clinic-navy focus:outline-none focus:ring-1 focus:ring-clinic-navy";
 
   return (
-    <section id="lead-form" className="bg-clinic-mintLight px-6 py-24 md:py-32">
+    <section id="lead-form" className={`bg-clinic-mintLight ${SECTION_PADDING}`}>
       <div className="mx-auto max-w-2xl">
         <div className="mb-10 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">
