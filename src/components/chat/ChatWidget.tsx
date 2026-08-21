@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { ChatPanel } from "./ChatPanel";
 
@@ -31,6 +31,29 @@ export function ChatWidget({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [initialMessage, setInitialMessage] = useState<string | null>(null);
 
+  // At 375px the launcher (fixed bottom-right) can land on top of page text
+  // at whatever scroll position happens to put content there — documented
+  // in BRIGHTPATHHANDOFF.md against Citra Dewi's specialty line, but it's
+  // generic to any fixed element over scrollable content, not that section
+  // specifically. Shrinking it on mobile (below) reduces how much text any
+  // one position can cover; fading it while the page is actively moving
+  // means it isn't sitting solid on top of text as it scrolls past.
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => {
+    function handleScroll() {
+      setIsScrolling(true);
+      clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => setIsScrolling(false), 350);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(scrollTimeout.current);
+    };
+  }, []);
+
   const open = useCallback(() => {
     setInitialMessage(null);
     setIsOpen(true);
@@ -52,10 +75,12 @@ export function ChatWidget({ children }: { children: React.ReactNode }) {
       {isOpen && <ChatPanel onClose={handleClose} initialMessage={initialMessage} />}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-clinic-mint text-white shadow-lg"
+        className={`fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-clinic-mint text-white shadow-lg transition-opacity duration-300 sm:bottom-6 sm:right-6 sm:h-14 sm:w-14 ${
+          isScrolling && !isOpen ? "opacity-40" : "opacity-100"
+        }`}
         aria-label="Open chat"
       >
-        <MessageCircle size={24} strokeWidth={1.75} />
+        <MessageCircle size={22} strokeWidth={1.75} />
       </button>
     </ChatContext.Provider>
   );
