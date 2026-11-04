@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { embed } from "@/lib/ai/embeddings";
 import { isAdminEmail } from "@/lib/auth/admin";
+import { sanitizeFilename, matchesFileSignature } from "@/lib/files";
 import type { DocumentFileType, KnowledgeUploadResponse } from "@/types";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -73,7 +74,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
 
-  const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+  const safeName = sanitizeFilename(file.name);
+  const extension = safeName.split(".").pop()?.toLowerCase() ?? "";
   const fileType = EXTENSION_TO_TYPE[extension];
 
   if (!fileType) {
@@ -90,9 +92,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const service = createServiceClient();
   const buffer = Buffer.from(await file.arrayBuffer());
-  const storagePath = `${crypto.randomUUID()}-${file.name}`;
+
+  if (!matchesFileSignature(buffer, fileType)) {
+    return NextResponse.json(
+      { error: "File content does not match its extension" },
+      { status: 400 },
+    );
+  }
+
+  const service = createServiceClient();
+  const storagePath = `${crypto.randomUUID()}-${safeName}`;
 
   const { error: uploadError } = await service.storage
     .from("documents")
