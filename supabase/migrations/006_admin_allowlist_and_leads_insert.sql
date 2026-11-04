@@ -69,3 +69,16 @@ alter policy "Admin update leads" on leads
 
 alter policy "Admin delete leads" on leads
   using (is_admin());
+
+-- "Public insert leads" (anon, with_check: true) let anyone holding the
+-- anon key insert directly into leads, bypassing the app's own
+-- validation (zod schema, rate limiting, honeypot — see /api/leads).
+-- Confirmed before dropping it that nothing relies on that path: the
+-- only place leads are ever inserted is /api/leads/route.ts, and it
+-- uses createServiceClient() (service role), which bypasses RLS
+-- entirely — this policy was never actually exercised by the real app,
+-- only by whoever else had the anon key. No client component talks to
+-- Supabase directly for leads (grepped for `.from("leads")` and for any
+-- Supabase client call under src/components — the only hit is the API
+-- route itself).
+drop policy "Public insert leads" on leads;

@@ -5,6 +5,9 @@ import { useState } from "react";
 export function LeadCapture({ conversationId }: { conversationId?: string }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  // Honeypot — real visitors never see this field, so a filled value
+  // means a bot. Checked server-side in /api/leads.
+  const [website, setWebsite] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,6 +26,7 @@ export function LeadCapture({ conversationId }: { conversationId?: string }) {
           phone,
           conversationId,
           source: "chat",
+          website: website || undefined,
         }),
       });
 
@@ -72,6 +76,25 @@ export function LeadCapture({ conversationId }: { conversationId?: string }) {
         onChange={(e) => setPhone(e.target.value)}
         className="w-full rounded-lg border border-clinic-border px-3 py-2 text-sm"
       />
+      {/* Honeypot — invisible to real visitors, irresistible to bots.
+          Placed after the real fields rather than before, so it never
+          becomes "the first text input" for a selector that assumes
+          that's the name field. */}
+      <div
+        aria-hidden="true"
+        className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden"
+      >
+        <label htmlFor="lead-capture-website">Website</label>
+        <input
+          type="text"
+          id="lead-capture-website"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+        />
+      </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"

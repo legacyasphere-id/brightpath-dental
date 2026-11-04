@@ -117,6 +117,9 @@ export interface LeadRequestBody {
   conversationId?: string;
   source?: LeadSource;
   message?: string;
+  // Honeypot — see leadSchema in lib/validation.ts and LeadForm.tsx /
+  // LeadCapture.tsx. Always empty for a real visitor.
+  website?: string;
 }
 
 export interface KnowledgeUploadResponse {
