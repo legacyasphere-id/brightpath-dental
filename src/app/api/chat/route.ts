@@ -3,7 +3,11 @@ import { retrieveContext, detectLanguage } from "@/lib/ai/retrieval";
 import { buildSystemPrompt } from "@/lib/ai/prompts";
 import { streamChat, errorStream, noContextStream } from "@/lib/ai/chat";
 import { logChatTurn } from "@/lib/supabase/logging";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { isValidUuid } from "@/lib/validation";
 import type { ChatRequestBody } from "@/types";
+
+const MAX_MESSAGE_LENGTH = 1000;
 
 function sseResponse(stream: ReadableStream<Uint8Array>) {
   return new Response(stream, {
@@ -28,8 +32,27 @@ export async function POST(request: Request) {
   if (!message || typeof message !== "string") {
     return Response.json({ error: "message is required" }, { status: 400 });
   }
-  if (!sessionId || typeof sessionId !== "string") {
-    return Response.json({ error: "sessionId is required" }, { status: 400 });
+  if (message.length > MAX_MESSAGE_LENGTH) {
+    return Response.json(
+      { error: `message must be ${MAX_MESSAGE_LENGTH} characters or fewer` },
+      { status: 400 },
+    );
+  }
+  if (!isValidUuid(sessionId)) {
+    return Response.json({ error: "sessionId must be a valid UUID" }, { status: 400 });
+  }
+
+  // Gated after shape validation (above) so a malformed request never
+  // spends a Redis round trip, but before retrieval (below) since that's
+  // what actually calls a paid embedding model — this is the limit that
+  // matters for cost, not the cheap checks above it.
+  const ip = getClientIp(request);
+  const { limited } = await checkRateLimit("chat", 20, "1 m", ip);
+  if (limited) {
+    return Response.json(
+      { error: "Too many requests. Please wait a moment and try again." },
+      { status: 429 },
+    );
   }
 
   // Computed up front, independent of retrieval, so an error reply follows
