@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { embed } from "@/lib/ai/embeddings";
+import { isAdminEmail } from "@/lib/auth/admin";
 import type { DocumentFileType, KnowledgeUploadResponse } from "@/types";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -60,6 +61,9 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isAdminEmail(user.email)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const formData = await request.formData();
@@ -191,6 +195,9 @@ export async function GET() {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isAdminEmail(user.email)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const service = createServiceClient();
