@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ChatMessage, type ChatMessageData } from "./ChatMessage";
 import { ChatEmptyState } from "./ChatEmptyState";
 import { LeadCapture } from "./LeadCapture";
@@ -172,9 +173,21 @@ export function ChatPanel({
   return (
     <div className="fixed bottom-24 left-4 right-4 z-50 flex h-[min(620px,calc(100dvh-7rem))] flex-col rounded-xl border border-clinic-border bg-clinic-surface shadow-2xl min-[480px]:left-auto min-[480px]:right-6 min-[480px]:w-[400px]">
       <div className="flex items-center justify-between rounded-t-xl bg-clinic-navy px-4 py-3 text-white">
-        <span className="font-sans text-sm font-semibold">
-          BrightPath AI · Instant Answers
-        </span>
+        <div className="flex items-center gap-2.5">
+          <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-clinic-mint/50 bg-[#EAF3EF]">
+            <Image
+              src="/images/mascot/ai-mascot-avatar.webp"
+              alt=""
+              fill
+              sizes="28px"
+              className="object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </span>
+          <span className="font-sans text-sm font-semibold">
+            BrightPath AI · Instant Answers
+          </span>
+        </div>
         <button onClick={onClose} aria-label="Close chat">
           ×
         </button>

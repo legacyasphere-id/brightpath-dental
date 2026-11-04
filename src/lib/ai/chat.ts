@@ -4,14 +4,16 @@ import type { ChatErrorCode, MessageSource } from "@/types";
 import type { Language } from "@/lib/ai/language";
 import { logChatTurn } from "@/lib/supabase/logging";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://openrouter.ai/api/v1",
-  defaultHeaders: {
-    "HTTP-Referer": "https://brightpath-dental.vercel.app",
-    "X-Title": "BrightPath Dental",
-  },
-});
+function getOpenAIClient() {
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY ?? "",
+    baseURL: "https://openrouter.ai/api/v1",
+    defaultHeaders: {
+      "HTTP-Referer": "https://brightpath-dental.vercel.app",
+      "X-Title": "BrightPath Dental",
+    },
+  });
+}
 
 const LEAD_KEYWORDS = [
   "book",
@@ -126,6 +128,7 @@ export async function streamChat(
 ): Promise<ReadableStream<Uint8Array>> {
   let completion;
   try {
+    const openai = getOpenAIClient();
     completion = await openai.chat.completions.create({
       model: process.env.OPENAI_CHAT_MODEL ?? "openai/gpt-4o-mini",
       stream: true,

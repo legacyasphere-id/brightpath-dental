@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
   if (!fileType) {
     return NextResponse.json(
-      { error: "Unsupported file type — use PDF, DOCX, or TXT" },
+      { error: "Unsupported file type. Please use PDF, DOCX, or TXT" },
       { status: 400 },
     );
   }

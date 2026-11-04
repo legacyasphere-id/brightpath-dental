@@ -39,7 +39,7 @@ export function WhyUs() {
           <h2 className="mt-2 font-sans text-4xl font-light tracking-tight">
             Why BrightPath?
           </h2>
-          <p className="mt-3 max-w-xl text-white/65">
+          <p className="mt-3 max-w-xl text-white/80">
             We combine clinical expertise with modern technology for every
             patient visit.
           </p>
@@ -58,7 +58,7 @@ export function WhyUs() {
                 <h3 className="mt-4 font-sans text-base font-semibold text-white">
                   {r.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/60">
+                <p className="mt-2 text-sm leading-relaxed text-white/75">
                   {r.description}
                 </p>
               </div>

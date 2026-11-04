@@ -101,7 +101,7 @@ export function KnowledgeUpload({ initialDocuments = [] }: Props) {
         ) : (
           <>
             <p className="font-medium text-clinic-text">Click or drag a file here</p>
-            <p className="mt-1 text-clinic-muted">PDF, DOCX, or TXT — max 10MB</p>
+            <p className="mt-1 text-clinic-muted">PDF, DOCX, or TXT · max 10MB</p>
           </>
         )}
       </div>

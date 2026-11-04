@@ -1,59 +1,45 @@
 import Image from "next/image";
-import { MessageCircle, Sparkle, Star } from "lucide-react";
+import { MessageCircle, Clock, MapPin, CalendarCheck } from "lucide-react";
 
-// Set once a cut-out subject photo exists (e.g. "/images/hero/patient.webp").
-// Until then the mint shape behind the feature card renders on its own as
-// an intentional soft background form, not an empty placeholder — nothing
-// else about the layout needs to change when the asset arrives.
-const heroSubjectImageSrc: string | undefined = undefined;
+const heroSubjectImageSrc = "/images/hero/dentist-consultation.webp";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-clinic-bg">
-      <div className="mx-auto max-w-6xl px-6 py-24 md:py-40">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Left — copy */}
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-clinic-mint/30 bg-clinic-mintLight px-4 py-1.5 text-xs font-semibold text-clinic-navy">
-              <span className="h-1.5 w-1.5 rounded-full bg-clinic-mint" />
-              Dental Clinic · Bekasi
-            </span>
-            <h1 className="mt-6 font-sans text-5xl font-light tracking-tight leading-[1.05] text-clinic-text md:text-6xl">
+    <section className="relative overflow-hidden bg-clinic-bg pt-12 pb-16 md:pt-20 md:pb-24">
+      <div className="mx-auto max-w-6xl px-6">
+        {/* Main 2-column Hero Split (modeled after Damessa Bekasi Figma) */}
+        <div className="grid items-center gap-10 lg:grid-cols-12">
+          {/* Left — Headline, Subtitle & Primary CTA */}
+          <div className="min-w-0 lg:col-span-6">
+            <h1 className="font-sans text-4xl font-light tracking-tight leading-[1.08] text-clinic-text sm:text-5xl md:text-6xl">
               Modern dental care,{" "}
-              <span className="font-semibold text-clinic-navy">built around you.</span>
+              <span className="font-semibold text-clinic-navy">
+                built around you.
+              </span>
             </h1>
-            <p className="mt-5 text-lg leading-relaxed text-clinic-body">
-              Premium dental treatment backed by experienced specialists,
-              modern equipment, and an AI assistant that answers your
-              questions instantly. Available any time of day.
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-clinic-body sm:text-lg">
+              BrightPath Dental in Bekasi Selatan brings together experienced
+              dental specialists, digital X-ray and CAD/CAM technology, and a
+              24/7 AI assistant ready to care for children and adults.
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
+
+            <div className="mt-8 flex flex-wrap gap-3.5">
               <a
                 href="#lead-form"
-                className="inline-flex items-center gap-2 rounded-lg bg-clinic-navy px-6 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-clinic-navyDark"
+                className="inline-flex items-center gap-2 rounded-full bg-clinic-navy px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-clinic-navyDark"
               >
+                <CalendarCheck size={17} strokeWidth={1.75} />
                 Book an Appointment
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
               </a>
               <a
                 href="#ai-demo"
-                className="inline-flex items-center gap-2 rounded-lg border border-clinic-mint/20 bg-clinic-mintLight px-6 py-3 font-semibold text-clinic-navy transition-colors hover:bg-white"
+                className="inline-flex items-center gap-2 rounded-full border border-clinic-mint/30 bg-clinic-mintLight px-6 py-3.5 text-sm font-semibold text-clinic-navy transition-colors hover:bg-white"
               >
-                <MessageCircle size={20} strokeWidth={1.75} />
+                <MessageCircle size={18} strokeWidth={1.75} />
                 Ask our AI
               </a>
             </div>
 
-            {/* Pricing transparency called out this early on purpose — a
-                multi-branch competitor that routes every price question to
-                WhatsApp cannot copy this. Honest, not a claim of being
-                cheapest. */}
             <a
               href="#pricing"
               className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-clinic-body transition-colors hover:text-clinic-navy"
@@ -69,88 +55,78 @@ export function Hero() {
             </a>
           </div>
 
-          {/* Right — feature card overlapping a mint shape reserved for a
-              future patient photo. The shape is the layout's image slot:
-              set heroSubjectImageSrc above once a cut-out photo exists. */}
-          <div className="relative hidden lg:block">
+          {/* Right — Consultation Photo with soft organic frame */}
+          <div className="relative min-w-0 lg:col-span-6">
             <div
               aria-hidden="true"
-              className="absolute -right-4 -top-10 h-96 w-96 overflow-hidden rounded-full bg-clinic-mintLight"
-            >
-              {heroSubjectImageSrc && (
-                <Image
-                  src={heroSubjectImageSrc}
-                  alt=""
-                  fill
-                  sizes="384px"
-                  className="object-cover"
-                />
-              )}
+              className="absolute -right-6 -top-6 hidden h-64 w-64 rounded-full bg-clinic-mintLight sm:block"
+            />
+            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-clinic-border bg-clinic-mintLight shadow-md">
+              <Image
+                src={heroSubjectImageSrc}
+                alt="Dentist at BrightPath Dental Bekasi explaining a digital panoramic dental X-ray on a tablet to a smiling patient"
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 560px"
+                className="object-cover"
+              />
             </div>
+          </div>
+        </div>
 
-            {/* Sparse accent marks — brightness, not dental iconography. */}
-            <Sparkle
-              aria-hidden="true"
-              className="absolute -left-3 top-10 h-5 w-5 text-clinic-mint"
-              strokeWidth={1.5}
-            />
-            <Star
-              aria-hidden="true"
-              className="absolute right-16 -top-6 h-4 w-4 text-clinic-navy/40"
-              strokeWidth={1.5}
-            />
-            <Sparkle
-              aria-hidden="true"
-              className="absolute -left-6 bottom-24 h-4 w-4 text-clinic-mint/60"
-              strokeWidth={1.5}
-            />
-
-            <div className="relative z-10 ml-6 mt-20 rounded-2xl bg-clinic-navy p-8 text-white shadow-xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-mint">
-                Why patients choose us
-              </p>
-              <h3 className="mt-3 font-sans text-xl font-bold">
-                A complete dental experience
-              </h3>
-              <p className="mt-2 text-sm text-white/60">
-                Everything you need, under one roof in central Bekasi.
-              </p>
-              <ul className="mt-6 space-y-3">
-                {[
-                  "AI-powered patient assistant (24/7)",
-                  "Digital X-ray & same-day results",
-                  "Specialist dentists on staff",
-                  "Easy WhatsApp appointment booking",
-                  "BPJS & private insurance accepted",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm">
-                    <svg
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="mt-0.5 h-4 w-4 flex-shrink-0 text-clinic-mint"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="text-white/80">{item}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-8 rounded-xl border border-white/10 bg-white/5 p-4">
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-clinic-mint animate-pulse" />
-                  <p className="text-xs font-semibold text-white">
-                    AI Assistant · Online Now
-                  </p>
-                </div>
-                <p className="mt-2 text-xs text-white/50">
-                  &ldquo;What&apos;s the cost of teeth whitening?&rdquo; Ask
-                  anything, get an instant answer.
+        {/* Damessa-style Bottom Operational Hours & Address Bar */}
+        <div className="mt-10 rounded-2xl border border-clinic-border bg-white p-6 shadow-sm md:p-7">
+          <div className="grid items-center gap-6 lg:grid-cols-12">
+            {/* Jam Operasional */}
+            <div className="flex items-start gap-3.5 lg:col-span-4">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-clinic-mintLight text-clinic-navy">
+                <Clock size={20} strokeWidth={1.75} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-clinic-navy">
+                  Operating Hours
+                </p>
+                <p className="mt-1 text-sm font-medium text-clinic-text">
+                  Mon–Fri: 08.00–20.00 WIB
+                </p>
+                <p className="text-xs text-clinic-muted">
+                  Sat: 08.00–17.00 · Sun: 09.00–14.00 WIB
                 </p>
               </div>
+            </div>
+
+            {/* Alamat */}
+            <div className="flex items-start gap-3.5 lg:col-span-5 lg:border-l lg:border-clinic-border lg:pl-6">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-clinic-mintLight text-clinic-navy">
+                <MapPin size={20} strokeWidth={1.75} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-clinic-navy">
+                  Clinic Address
+                </p>
+                <p className="mt-1 text-sm font-medium text-clinic-text">
+                  Jl. Ahmad Yani No. 45, Bekasi Selatan
+                </p>
+                <p className="text-xs text-clinic-muted">
+                  Kota Bekasi 17141 · Near Grand Galaxy · Free Parking
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Reservation Actions */}
+            <div className="flex flex-wrap items-center gap-3 lg:col-span-3 lg:justify-end">
+              <a
+                href="#lead-form"
+                className="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-full bg-clinic-navy px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-clinic-navyDark sm:flex-initial"
+              >
+                Reserve Now
+              </a>
+              <a
+                href="#facility"
+                className="inline-flex flex-1 items-center justify-center whitespace-nowrap rounded-full border border-clinic-border bg-clinic-bg px-4 py-2.5 text-xs font-semibold text-clinic-navy transition-colors hover:border-clinic-navy sm:flex-initial"
+              >
+                Clinic Tour
+              </a>
             </div>
           </div>
         </div>

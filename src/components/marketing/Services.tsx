@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ClipboardCheck,
   Sparkles,
@@ -8,6 +10,7 @@ import {
   Scissors,
   Crown,
   Replace,
+  CalendarCheck,
   type LucideIcon,
 } from "lucide-react";
 import { SECTION_PADDING } from "@/lib/utils";
@@ -70,47 +73,80 @@ const services: { icon: LucideIcon; title: string; description: string }[] = [
 ];
 
 export function Services() {
+  const handleBookService = (serviceTitle: string) => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("brightpath:preselect-booking", {
+          detail: { service: serviceTitle },
+        }),
+      );
+    }
+  };
+
   return (
     <section id="services" className={`bg-clinic-surface ${SECTION_PADDING}`}>
       <div className="mx-auto max-w-6xl">
-        <div className="mb-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">
+        {/* Centered Header (matching Damessa Figma "Our Services") */}
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/75">
             What We Offer
           </p>
           <h2 className="mt-2 font-sans text-4xl font-light tracking-tight text-clinic-text">
-            Our Services
+            Our{" "}
+            <span className="font-semibold text-clinic-navy">Services</span>
           </h2>
-          <p className="mt-3 max-w-xl text-clinic-body">
-            Our services range from routine check-ups to advanced
-            restorative work. All delivered in Bekasi.
+          <p className="mt-3 text-sm leading-relaxed text-clinic-body sm:text-base">
+            Our specialist and general dentists in Bekasi Selatan are ready to
+            help with everything from routine check-ups, digital X-rays, and
+            scaling to braces, implants, and same-day crowns.
           </p>
         </div>
+
+        {/* Clean 3-column Service Grid */}
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s) => {
             const Icon = s.icon;
             return (
               <div
                 key={s.title}
-                className="group rounded-xl border border-clinic-border bg-clinic-bg p-6 transition-all hover:border-clinic-navy hover:shadow-md"
+                className="group flex flex-col justify-between rounded-2xl border border-clinic-border bg-clinic-bg p-6 transition-all hover:border-clinic-navy hover:shadow-md"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-clinic-mintLight">
-                  <Icon size={22} strokeWidth={1.75} className="text-clinic-navy" />
+                <div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-clinic-mintLight">
+                    <Icon
+                      size={22}
+                      strokeWidth={1.75}
+                      className="text-clinic-navy"
+                    />
+                  </div>
+                  <h3 className="mt-4 font-sans text-base font-semibold text-clinic-text">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-clinic-body">
+                    {s.description}
+                  </p>
                 </div>
-                <h3 className="mt-4 font-sans text-base font-semibold text-clinic-text">
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-clinic-body">
-                  {s.description}
-                </p>
                 <a
                   href="#lead-form"
-                  className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-clinic-navy opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={() => handleBookService(s.title)}
+                  className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-clinic-navy transition-colors hover:text-clinic-navyDark"
                 >
                   Book this service →
                 </a>
               </div>
             );
           })}
+        </div>
+
+        {/* Centered Bottom CTA (matching Damessa Figma "Pilih perawatanmu sekarang!") */}
+        <div className="mt-10 text-center">
+          <a
+            href="#lead-form"
+            className="inline-flex items-center gap-2 rounded-full bg-clinic-navy px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-clinic-navyDark"
+          >
+            <CalendarCheck size={17} strokeWidth={1.75} />
+            Choose Your Treatment Now
+          </a>
         </div>
       </div>
     </section>

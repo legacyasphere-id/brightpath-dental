@@ -24,8 +24,10 @@ export function Nav() {
         <div className="hidden items-center gap-8 md:flex">
           {[
             { href: "#services", label: "Services" },
+            { href: "#facility", label: "Clinic Tour" },
             { href: "#doctors", label: "Doctors" },
             { href: "#pricing", label: "Pricing" },
+            { href: "#faq", label: "FAQ" },
           ].map((l) => (
             <a
               key={l.href}
@@ -66,8 +68,10 @@ export function Nav() {
         <div className="flex flex-col gap-4 border-t border-clinic-border bg-clinic-surface px-6 py-5 md:hidden">
           {[
             { href: "#services", label: "Services" },
+            { href: "#facility", label: "Clinic Tour" },
             { href: "#doctors", label: "Doctors" },
             { href: "#pricing", label: "Pricing" },
+            { href: "#faq", label: "FAQ" },
           ].map((l) => (
             <a
               key={l.href}

@@ -25,8 +25,8 @@ message looks like.
 ${langInstruction}
 Answer ONLY using the clinic information provided below.
 If the answer is not in the context, say in the user's language:
-"Saya tidak memiliki informasi tersebut — silakan hubungi kami atau gunakan form pemesanan." (id)
-"I don't have that information — please call us or use the booking form." (en)
+"Saya tidak memiliki informasi tersebut, silakan hubungi kami atau gunakan form pemesanan." (id)
+"I don't have that information, please call us or use the booking form." (en)
 Be warm, concise, and helpful. Always offer to help book an appointment.
 
 CLINIC CONTEXT:

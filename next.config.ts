@@ -13,6 +13,9 @@ import type { NextConfig } from "next";
 // to hydrate at all in development — confirmed by running it and seeing
 // exactly that CSP violation, not assumed. Production builds don't eval
 // anything, so this stays out of what actually ships.
+const IS_STANDALONE_PROD =
+  process.env.NODE_ENV === "production" && !process.env.APP_URL;
+
 const SCRIPT_SRC =
   process.env.NODE_ENV === "production"
     ? "script-src 'self' 'unsafe-inline'"
@@ -29,7 +32,7 @@ const CSP_DIRECTIVES = [
   // (OpenRouter, the service-role Supabase client) is server-side only
   // and isn't a browser connect-src concern.
   "connect-src 'self' https://*.supabase.co",
-  "frame-ancestors 'none'",
+  IS_STANDALONE_PROD ? "frame-ancestors 'none'" : "frame-ancestors *",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
@@ -37,22 +40,24 @@ const CSP_DIRECTIVES = [
 
 const nextConfig: NextConfig = {
   async headers() {
+    const securityHeaders = [
+      { key: "Content-Security-Policy", value: CSP_DIRECTIVES },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+      },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+    ];
+
+    if (IS_STANDALONE_PROD) {
+      securityHeaders.push({ key: "X-Frame-Options", value: "DENY" });
+    }
+
     return [
       {
         source: "/(.*)",
-        headers: [
-          { key: "Content-Security-Policy", value: CSP_DIRECTIVES },
-          // Belt-and-braces alongside frame-ancestors above — older
-          // browsers that don't understand CSP's frame-ancestors still
-          // respect this.
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
-          },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-        ],
+        headers: securityHeaders,
       },
     ];
   },

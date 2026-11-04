@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { MessageRole } from "@/types";
 import type { Language } from "@/lib/ai/language";
 
@@ -173,8 +174,18 @@ export function ChatMessage({
   }
 
   return (
-    <div className="text-left">
-      <div className="inline-block max-w-[85%] rounded-lg bg-clinic-mintLight px-3 py-2 text-sm text-clinic-text">
+    <div className="flex items-start gap-2 text-left">
+      <span className="relative mt-0.5 h-7 w-7 shrink-0 overflow-hidden rounded-full border border-clinic-mint/30 bg-[#EAF3EF]">
+        <Image
+          src="/images/mascot/ai-mascot-avatar.webp"
+          alt=""
+          fill
+          sizes="28px"
+          className="object-cover"
+          referrerPolicy="no-referrer"
+        />
+      </span>
+      <div className="inline-block max-w-[82%] rounded-lg bg-clinic-mintLight px-3 py-2 text-sm text-clinic-text">
         {renderMarkdown(message.content)}
       </div>
     </div>

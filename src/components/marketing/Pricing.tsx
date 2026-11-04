@@ -1,9 +1,12 @@
+"use client";
+
 import { SECTION_PADDING } from "@/lib/utils";
 
 const plans = [
   {
     name: "Basic Check-up",
     price: "Rp 150.000",
+    serviceMatch: "General Check-up & Cleaning",
     description: "Routine oral health maintenance",
     features: [
       "Comprehensive oral examination",
@@ -16,6 +19,7 @@ const plans = [
   {
     name: "Whitening Package",
     price: "Rp 800.000",
+    serviceMatch: "Teeth Whitening",
     description: "Professional whitening in one session",
     features: [
       "Pre-treatment examination",
@@ -30,6 +34,7 @@ const plans = [
   {
     name: "Implant Consultation",
     price: "Rp 250.000",
+    serviceMatch: "Dental Implants",
     description: "Full assessment for implant candidacy",
     features: [
       "Specialist consultation",
@@ -43,11 +48,21 @@ const plans = [
 ];
 
 export function Pricing() {
+  const handleSelectPlan = (serviceMatch: string) => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("brightpath:preselect-booking", {
+          detail: { service: serviceMatch },
+        }),
+      );
+    }
+  };
+
   return (
     <section id="pricing" className={`bg-clinic-surface ${SECTION_PADDING}`}>
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/75">
             Transparent Pricing
           </p>
           <h2 className="mt-2 font-sans text-4xl font-light tracking-tight text-clinic-text">
@@ -61,55 +76,58 @@ export function Pricing() {
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative rounded-xl border p-6 ${
+              className={`relative flex flex-col justify-between rounded-xl border p-6 ${
                 plan.highlighted
                   ? "scale-[1.02] border-clinic-navy bg-clinic-navy text-white shadow-xl"
                   : "border-clinic-border bg-clinic-bg"
               }`}
             >
-              {"badge" in plan && plan.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-clinic-mint px-3 py-0.5 text-xs font-semibold text-white">
-                  {plan.badge}
-                </span>
-              )}
-              <h3
-                className={`font-sans text-lg font-bold ${plan.highlighted ? "text-white" : "text-clinic-text"}`}
-              >
-                {plan.name}
-              </h3>
-              <p
-                className={`mt-1 text-xs ${plan.highlighted ? "text-white/60" : "text-clinic-muted"}`}
-              >
-                {plan.description}
-              </p>
-              <p
-                className={`mt-5 font-sans text-3xl font-extrabold ${plan.highlighted ? "text-white" : "text-clinic-navy"}`}
-              >
-                {plan.price}
-              </p>
-              <ul className="mt-6 space-y-2.5">
-                {plan.features.map((f) => (
-                  <li
-                    key={f}
-                    className={`flex items-start gap-2.5 text-sm ${plan.highlighted ? "text-white/80" : "text-clinic-body"}`}
-                  >
-                    <svg
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="mt-0.5 h-4 w-4 flex-shrink-0 text-clinic-mint"
+              <div>
+                {"badge" in plan && plan.badge && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-clinic-navyDark border border-clinic-mint/40 px-3 py-0.5 text-xs font-semibold text-white">
+                    {plan.badge}
+                  </span>
+                )}
+                <h3
+                  className={`font-sans text-lg font-bold ${plan.highlighted ? "text-white" : "text-clinic-text"}`}
+                >
+                  {plan.name}
+                </h3>
+                <p
+                  className={`mt-1 text-xs ${plan.highlighted ? "text-white/85" : "text-clinic-muted"}`}
+                >
+                  {plan.description}
+                </p>
+                <p
+                  className={`mt-5 font-sans text-3xl font-extrabold tabular-nums ${plan.highlighted ? "text-white" : "text-clinic-navy"}`}
+                >
+                  {plan.price}
+                </p>
+                <ul className="mt-6 space-y-2.5">
+                  {plan.features.map((f) => (
+                    <li
+                      key={f}
+                      className={`flex items-start gap-2.5 text-sm ${plan.highlighted ? "text-white/90" : "text-clinic-body"}`}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 text-clinic-mint"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
               <a
                 href="#lead-form"
+                onClick={() => handleSelectPlan(plan.serviceMatch)}
                 className={`mt-8 block w-full rounded-lg py-3 text-center text-sm font-semibold transition-colors ${
                   plan.highlighted
                     ? "bg-white text-clinic-navy hover:bg-clinic-bg"
