@@ -25,7 +25,13 @@ export default function AdminLoginPage() {
     setLoading(false);
 
     if (signInError) {
-      setError(signInError.message);
+      // The raw Supabase message (e.g. "Email not confirmed" vs.
+      // "Invalid login credentials") tells an attacker which accounts
+      // exist. Logged for local debugging — this runs in the visitor's
+      // own browser console, not a shared log — but never shown in the
+      // UI.
+      console.error("[admin login]", signInError);
+      setError("Invalid email or password.");
       return;
     }
 
