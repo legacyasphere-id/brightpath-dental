@@ -57,7 +57,7 @@ export function LeadCapture({ conversationId }: { conversationId?: string }) {
       className="space-y-2 rounded-lg border border-clinic-border bg-clinic-surface p-4"
     >
       <p className="text-sm text-clinic-body">
-        Let&apos;s get you booked in — share your details and we&apos;ll
+        Let&apos;s get you booked in. Share your details and we&apos;ll
         confirm via WhatsApp.
       </p>
       <input

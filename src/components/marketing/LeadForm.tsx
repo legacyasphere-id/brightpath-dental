@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { SECTION_PADDING } from "@/lib/utils";
 
@@ -40,6 +40,27 @@ export function LeadForm() {
     "idle" | "loading" | "success" | "error"
   >("idle");
 
+  useEffect(() => {
+    const handlePreselect = (e: Event) => {
+      const custom = e as CustomEvent<{ service?: string; doctorNote?: string }>;
+      const selectedService = custom.detail?.service;
+      const doctorNote = custom.detail?.doctorNote;
+      setForm((prev) => ({
+        ...prev,
+        service: selectedService ?? prev.service,
+        message:
+          doctorNote && !prev.message.includes(doctorNote)
+            ? prev.message
+              ? `${prev.message}\n${doctorNote}`
+              : doctorNote
+            : prev.message,
+      }));
+    };
+    window.addEventListener("brightpath:preselect-booking", handlePreselect);
+    return () =>
+      window.removeEventListener("brightpath:preselect-booking", handlePreselect);
+  }, []);
+
   const set =
     (k: keyof FormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -77,13 +98,13 @@ export function LeadForm() {
   };
 
   const inputCls =
-    "w-full rounded-lg border border-clinic-border px-4 py-2.5 text-sm text-clinic-text placeholder:text-clinic-muted focus:border-clinic-navy focus:outline-none focus:ring-1 focus:ring-clinic-navy";
+    "w-full rounded-lg border border-clinic-border bg-white px-4 py-2.5 text-sm text-clinic-text placeholder:text-clinic-muted focus:border-clinic-navy focus:outline-none focus:ring-1 focus:ring-clinic-navy";
 
   return (
     <section id="lead-form" className={`bg-clinic-mintLight ${SECTION_PADDING}`}>
       <div className="mx-auto max-w-2xl">
         <div className="mb-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/60">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-clinic-navy/75">
             Get In Touch
           </p>
           <h2 className="mt-2 font-sans text-4xl font-light tracking-tight text-clinic-text">
@@ -121,10 +142,14 @@ export function LeadForm() {
           >
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-clinic-text">
-                  Full Name <span className="text-red-500">*</span>
+                <label
+                  htmlFor="lead-full-name"
+                  className="mb-1.5 block text-sm font-medium text-clinic-text"
+                >
+                  Full Name <span className="text-red-600">*</span>
                 </label>
                 <input
+                  id="lead-full-name"
                   type="text"
                   required
                   placeholder="e.g. Budi Santoso"
@@ -134,10 +159,14 @@ export function LeadForm() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-clinic-text">
-                  WhatsApp Number <span className="text-red-500">*</span>
+                <label
+                  htmlFor="lead-whatsapp"
+                  className="mb-1.5 block text-sm font-medium text-clinic-text"
+                >
+                  WhatsApp Number <span className="text-red-600">*</span>
                 </label>
                 <input
+                  id="lead-whatsapp"
                   type="tel"
                   required
                   placeholder="e.g. 08123456789"
@@ -148,10 +177,14 @@ export function LeadForm() {
               </div>
             </div>
             <div className="mt-5">
-              <label className="mb-1.5 block text-sm font-medium text-clinic-text">
+              <label
+                htmlFor="lead-service"
+                className="mb-1.5 block text-sm font-medium text-clinic-text"
+              >
                 Service Needed
               </label>
               <select
+                id="lead-service"
                 value={form.service}
                 onChange={set("service")}
                 className={inputCls}
@@ -165,11 +198,15 @@ export function LeadForm() {
               </select>
             </div>
             <div className="mt-5">
-              <label className="mb-1.5 block text-sm font-medium text-clinic-text">
+              <label
+                htmlFor="lead-notes"
+                className="mb-1.5 block text-sm font-medium text-clinic-text"
+              >
                 Additional Notes{" "}
                 <span className="text-clinic-muted">(optional)</span>
               </label>
               <textarea
+                id="lead-notes"
                 rows={3}
                 placeholder="Describe your concern or any special requests..."
                 value={form.message}
@@ -188,8 +225,7 @@ export function LeadForm() {
                 "website" field tells /api/leads to silently drop the
                 submission. Placed after the real fields, not before, so
                 it stays out of "first text input" style selectors used
-                elsewhere (e.g. tests/lead-form.spec.ts) without needing
-                a `name` attribute on every real field just to disambiguate. */}
+                elsewhere (e.g. tests/lead-form.spec.ts). */}
             <div
               aria-hidden="true"
               className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden"

@@ -17,7 +17,7 @@ const config: Config = {
           mintLight: "#F0FAF5", // AI chat background, light sections
           text: "#1A1A2E", // near-black — all headings
           body: "#4A5568", // body copy
-          muted: "#718096", // captions, metadata
+          muted: "#526071", // captions, metadata (WCAG AA >= 4.5:1 on #FAFAF8 and #F0FAF5)
           border: "#E8EDF2", // dividers, card borders
         },
       },

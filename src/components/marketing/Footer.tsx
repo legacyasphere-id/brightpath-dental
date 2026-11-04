@@ -14,19 +14,16 @@ export function Footer() {
               Modern dental clinic in Bekasi delivering premium care through
               experienced specialists and AI-powered patient support.
             </p>
-            <div className="mt-4 flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-clinic-mint" />
-              <span className="text-xs text-clinic-muted">
-                AI Assistant Online 24/7
-              </span>
-            </div>
+            <p className="mt-4 text-xs text-clinic-muted">
+              AI Assistant Online 24/7
+            </p>
           </div>
 
           {/* Services links */}
           <div>
-            <h4 className="font-sans text-sm font-semibold text-clinic-text">
+            <h3 className="font-sans text-sm font-semibold text-clinic-text">
               Services
-            </h4>
+            </h3>
             <ul className="mt-4 space-y-2 text-sm text-clinic-body">
               {[
                 "General Dentistry",
@@ -50,9 +47,9 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="font-sans text-sm font-semibold text-clinic-text">
+            <h3 className="font-sans text-sm font-semibold text-clinic-text">
               Contact
-            </h4>
+            </h3>
             <ul className="mt-4 space-y-3 text-sm text-clinic-body">
               <li className="flex gap-2.5">
                 <MapPin size={16} className="mt-0.5 flex-shrink-0 text-clinic-muted" />

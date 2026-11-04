@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { MessageCircle } from "lucide-react";
 import { ChatPanel } from "./ChatPanel";
 
@@ -75,12 +76,24 @@ export function ChatWidget({ children }: { children: React.ReactNode }) {
       {isOpen && <ChatPanel onClose={handleClose} initialMessage={initialMessage} />}
       <button
         onClick={() => setIsOpen((v) => !v)}
-        className={`fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-clinic-mint text-white shadow-lg transition-opacity duration-300 sm:bottom-6 sm:right-6 sm:h-14 sm:w-14 ${
+        className={`fixed bottom-4 right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full border-2 border-clinic-mint bg-[#EAF3EF] shadow-lg transition-opacity duration-300 sm:bottom-6 sm:right-6 sm:h-14 sm:w-14 ${
           isScrolling && !isOpen ? "opacity-40" : "opacity-100"
         }`}
         aria-label="Open chat"
       >
-        <MessageCircle size={22} strokeWidth={1.75} />
+        <span className="relative h-full w-full overflow-hidden rounded-full">
+          <Image
+            src="/images/mascot/ai-mascot-avatar.webp"
+            alt=""
+            fill
+            sizes="56px"
+            className="object-cover"
+            referrerPolicy="no-referrer"
+          />
+        </span>
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-clinic-mint text-white shadow-sm ring-2 ring-white">
+          <MessageCircle size={11} strokeWidth={2.25} />
+        </span>
       </button>
     </ChatContext.Provider>
   );
