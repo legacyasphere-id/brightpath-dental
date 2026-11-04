@@ -22,6 +22,10 @@ type FormState = {
   phone: string;
   service: string;
   message: string;
+  // Honeypot — real visitors never see this field (hidden off-screen
+  // below), so a filled value means a bot. Checked server-side in
+  // /api/leads; never shown to the user as a validation error.
+  website: string;
 };
 
 export function LeadForm() {
@@ -30,6 +34,7 @@ export function LeadForm() {
     phone: "",
     service: "",
     message: "",
+    website: "",
   });
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
@@ -53,6 +58,7 @@ export function LeadForm() {
           serviceInterest: form.service || undefined,
           source: "form",
           message: form.message || undefined,
+          website: form.website || undefined,
         }),
       });
       setStatus(res.ok ? "success" : "error");
@@ -63,7 +69,7 @@ export function LeadForm() {
           "_blank",
           "noopener,noreferrer",
         );
-        setForm({ name: "", phone: "", service: "", message: "" });
+        setForm({ name: "", phone: "", service: "", message: "", website: "" });
       }
     } catch {
       setStatus("error");
@@ -177,6 +183,28 @@ export function LeadForm() {
                 via WhatsApp.
               </p>
             )}
+            {/* Honeypot — invisible to real visitors (off-screen, never
+                focusable), irresistible to form-filling bots. A non-empty
+                "website" field tells /api/leads to silently drop the
+                submission. Placed after the real fields, not before, so
+                it stays out of "first text input" style selectors used
+                elsewhere (e.g. tests/lead-form.spec.ts) without needing
+                a `name` attribute on every real field just to disambiguate. */}
+            <div
+              aria-hidden="true"
+              className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden"
+            >
+              <label htmlFor="website">Website</label>
+              <input
+                type="text"
+                id="website"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={form.website}
+                onChange={set("website")}
+              />
+            </div>
             <button
               type="submit"
               disabled={status === "loading"}

@@ -12,6 +12,15 @@ vi.mock('@/lib/supabase/logging', () => ({
   logChatTurn: vi.fn(),
 }));
 
+const { mockCheckRateLimit } = vi.hoisted(() => ({
+  mockCheckRateLimit: vi.fn(),
+}));
+
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: mockCheckRateLimit,
+  getClientIp: () => '1.2.3.4',
+}));
+
 const { mockRetrieveContext } = vi.hoisted(() => ({
   mockRetrieveContext: vi.fn(),
 }));
@@ -69,6 +78,51 @@ describe('/api/chat', () => {
     mockBuildSystemPrompt.mockClear();
     mockStreamChat.mockReset();
     mockNoContextStream.mockReset();
+    mockCheckRateLimit.mockReset();
+    mockCheckRateLimit.mockResolvedValue({ limited: false });
+  });
+
+  it('returns 400 when sessionId is not a valid UUID', async () => {
+    const { POST } = await import('@/app/api/chat/route');
+    const req = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message: 'hi', sessionId: 'not-a-uuid' }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    const resBody = await res.json();
+    expect(resBody.error).toContain('UUID');
+    expect(mockRetrieveContext).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when message exceeds 1000 characters', async () => {
+    const { POST } = await import('@/app/api/chat/route');
+    const req = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        message: 'a'.repeat(1001),
+        sessionId: crypto.randomUUID(),
+      }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    expect(mockRetrieveContext).not.toHaveBeenCalled();
+  });
+
+  it('returns 429 and never calls retrieval when rate limited', async () => {
+    mockCheckRateLimit.mockResolvedValue({ limited: true });
+
+    const { POST } = await import('@/app/api/chat/route');
+    const req = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      body: JSON.stringify({ message: 'hi', sessionId: crypto.randomUUID() }),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(429);
+    expect(mockRetrieveContext).not.toHaveBeenCalled();
   });
 
   it('never calls the model when retrieval matches zero chunks', async () => {
@@ -78,7 +132,7 @@ describe('/api/chat', () => {
     const { POST } = await import('@/app/api/chat/route');
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',
-      body: JSON.stringify({ message: 'ada layanan apa saja?', sessionId: 'sess-1' }),
+      body: JSON.stringify({ message: 'ada layanan apa saja?', sessionId: crypto.randomUUID() }),
       headers: { 'Content-Type': 'application/json' },
     });
     const res = await POST(req);
@@ -99,7 +153,7 @@ describe('/api/chat', () => {
     const { POST } = await import('@/app/api/chat/route');
     const req = new Request('http://localhost/api/chat', {
       method: 'POST',
-      body: JSON.stringify({ message: 'berapa harga scaling?', sessionId: 'sess-2' }),
+      body: JSON.stringify({ message: 'berapa harga scaling?', sessionId: crypto.randomUUID() }),
       headers: { 'Content-Type': 'application/json' },
     });
     const res = await POST(req);
